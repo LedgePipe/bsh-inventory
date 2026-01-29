@@ -86,7 +86,7 @@ export default function Home() {
   async function handleAddItem(item: InventoryItemInsert) {
     const { data, error } = await supabase
       .from('inventory_items')
-      .insert(item)
+      .insert(item as any)
       .select()
       .single()
 
@@ -118,11 +118,11 @@ export default function Home() {
       // Also create a log entry
       await supabase.from('inventory_logs').insert({
         item_id: itemId,
-        user_id: user?.id,
+        user_id: user?.id || '',
         previous_count: item.current_count,
         new_count: newCount,
         action: 'count_update'
-      })
+      } as any)
 
       setItems(items.map(i => i.id === itemId ? { ...i, current_count: newCount } : i))
       setEditingItem(null)
@@ -171,7 +171,7 @@ export default function Home() {
   async function handleBulkUpload(newItems: InventoryItemInsert[]) {
     const { data, error } = await supabase
       .from('inventory_items')
-      .insert(newItems)
+      .insert(newItems as any)
       .select()
 
     if (data) {
