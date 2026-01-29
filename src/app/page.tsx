@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getRandomQuote } from '@/lib/ralph-quotes'
-import { InventoryItem, Profile } from '@/types/database'
+import { InventoryItem, InventoryItemInsert, InventoryLogInsert, Profile } from '@/types/database'
 import { toast } from 'sonner'
 import LoginForm from '@/components/LoginForm'
 import Header from '@/components/Header'
@@ -83,10 +83,10 @@ export default function Home() {
     toast.info(`👋 ${getRandomQuote('delete')}`)
   }
 
-  async function handleAddItem(item: Partial<InventoryItem>) {
+  async function handleAddItem(item: InventoryItemInsert) {
     const { data, error } = await supabase
       .from('inventory_items')
-      .insert([item])
+      .insert(item)
       .select()
       .single()
 
@@ -168,7 +168,7 @@ export default function Home() {
     }
   }
 
-  async function handleBulkUpload(newItems: Partial<InventoryItem>[]) {
+  async function handleBulkUpload(newItems: InventoryItemInsert[]) {
     const { data, error } = await supabase
       .from('inventory_items')
       .insert(newItems)

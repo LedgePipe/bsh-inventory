@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { InventoryItem, InventoryCategory } from '@/types/database'
+import { InventoryItemInsert, InventoryCategory } from '@/types/database'
 import { getRandomQuote } from '@/lib/ralph-quotes'
 
 interface AddItemModalProps {
   onClose: () => void
-  onAdd: (item: Partial<InventoryItem>) => void
+  onAdd: (item: InventoryItemInsert) => void
 }
 
 export default function AddItemModal({ onClose, onAdd }: AddItemModalProps) {

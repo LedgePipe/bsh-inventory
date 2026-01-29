@@ -113,4 +113,6 @@ export interface Database {
 
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type InventoryItem = Database['public']['Tables']['inventory_items']['Row']
+export type InventoryItemInsert = Database['public']['Tables']['inventory_items']['Insert']
 export type InventoryLog = Database['public']['Tables']['inventory_logs']['Row']
+export type InventoryLogInsert = Database['public']['Tables']['inventory_logs']['Insert']

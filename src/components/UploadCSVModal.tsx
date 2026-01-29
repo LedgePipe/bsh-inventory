@@ -1,22 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { InventoryItem, InventoryCategory } from '@/types/database'
+import { InventoryItemInsert, InventoryCategory } from '@/types/database'
 import { getRandomQuote } from '@/lib/ralph-quotes'
 
 interface UploadCSVModalProps {
   onClose: () => void
-  onUpload: (items: Partial<InventoryItem>[]) => void
+  onUpload: (items: InventoryItemInsert[]) => void
 }
 
 export default function UploadCSVModal({ onClose, onUpload }: UploadCSVModalProps) {
   const [file, setFile] = useState<File | null>(null)
-  const [preview, setPreview] = useState<Partial<InventoryItem>[]>([])
+  const [preview, setPreview] = useState<InventoryItemInsert[]>([])
   const [error, setError] = useState('')
 
-  function parseCSV(text: string): Partial<InventoryItem>[] {
+  function parseCSV(text: string): InventoryItemInsert[] {
     const lines = text.split('\n')
-    const items: Partial<InventoryItem>[] = []
+    const items: InventoryItemInsert[] = []
 
     lines.forEach((line, idx) => {
       if (idx === 0 || !line.trim()) return // Skip header and empty lines
