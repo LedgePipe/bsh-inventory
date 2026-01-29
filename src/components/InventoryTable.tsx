@@ -33,7 +33,7 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
     supplies: '📦'
   }
 
-  function getStatus(item: InventoryItem) {
+  function getStatus(item: InventoryItemWithUpdater) {
     if (item.par_level === 0) return { class: 'bg-gray-100 text-gray-600', text: '➖ No Par', percent: 100 }
     const percent = (item.current_count / item.par_level) * 100
     if (percent < 50) return { class: 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700', text: '🚨 Low', percent }
