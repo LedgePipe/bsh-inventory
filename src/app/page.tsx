@@ -111,7 +111,7 @@ export default function Home() {
         current_count: newCount,
         updated_at: new Date().toISOString(),
         updated_by: user?.id
-      })
+      } as any)
       .eq('id', itemId)
 
     if (!error) {
