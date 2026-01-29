@@ -1,0 +1,125 @@
+'use client'
+
+import { useState } from 'react'
+import { InventoryItem } from '@/types/database'
+import { getRandomQuote } from '@/lib/ralph-quotes'
+
+interface EditCountModalProps {
+  item: InventoryItem
+  onClose: () => void
+  onSave: (itemId: string, newCount: number) => void
+}
+
+export default function EditCountModal({ item, onClose, onSave }: EditCountModalProps) {
+  const [count, setCount] = useState(item.current_count.toString())
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    onSave(item.id, parseInt(count) || 0)
+  }
+
+  function adjustCount(delta: number) {
+    const newCount = Math.max(0, (parseInt(count) || 0) + delta)
+    setCount(newCount.toString())
+  }
+
+  const newCount = parseInt(count) || 0
+  const diff = newCount - item.current_count
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md animate-slide-in" onClick={e => e.stopPropagation()}>
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 bg-gray-100 hover:bg-red-100 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors"
+        >
+          ×
+        </button>
+
+        <h3 className="text-xl font-bold text-gray-800 mb-2">🔢 Count the Bottles!</h3>
+        <p className="text-gray-500 text-sm italic mb-4">"1... 2... 3... I can count to potato!"</p>
+
+        {/* Item info */}
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500 rounded-xl p-4 mb-6">
+          <p className="font-bold text-purple-700">{item.code}</p>
+          <p className="text-gray-700">{item.name}</p>
+          <p className="text-sm text-gray-500 mt-1">
+            We want <strong>{item.par_level}</strong> | We got <strong>{item.current_count}</strong>
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-semibold mb-2">
+              How Many Bottles Do We Got?
+            </label>
+
+            {/* Big count input with +/- buttons */}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => adjustCount(-1)}
+                className="w-12 h-12 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl text-2xl font-bold transition-colors"
+              >
+                -
+              </button>
+
+              <input
+                type="number"
+                value={count}
+                onChange={(e) => setCount(e.target.value)}
+                className="flex-1 px-4 py-4 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none text-center text-3xl font-bold"
+                min="0"
+                required
+              />
+
+              <button
+                type="button"
+                onClick={() => adjustCount(1)}
+                className="w-12 h-12 bg-green-100 hover:bg-green-200 text-green-700 rounded-xl text-2xl font-bold transition-colors"
+              >
+                +
+              </button>
+            </div>
+
+            {/* Quick adjust buttons */}
+            <div className="flex gap-2 mt-3 justify-center">
+              {[-5, -1, 1, 5].map(delta => (
+                <button
+                  key={delta}
+                  type="button"
+                  onClick={() => adjustCount(delta)}
+                  className={`px-3 py-1 rounded-lg text-sm font-semibold ${
+                    delta > 0
+                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                      : 'bg-red-100 text-red-700 hover:bg-red-200'
+                  }`}
+                >
+                  {delta > 0 ? '+' : ''}{delta}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Diff indicator */}
+          {diff !== 0 && (
+            <div className={`text-center p-2 rounded-lg mb-4 ${
+              diff > 0
+                ? 'bg-green-50 text-green-700'
+                : 'bg-red-50 text-red-700'
+            }`}>
+              {diff > 0 ? `➕ Adding ${diff} bottles!` : `➖ Removing ${Math.abs(diff)} bottles!`}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all transform hover:-translate-y-1"
+          >
+            💾 Save My Counting!
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
