@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getRandomQuote } from '@/lib/ralph-quotes'
-import { InventoryItem, InventoryItemInsert, InventoryLogInsert, Profile } from '@/types/database'
+import { InventoryItem, InventoryItemInsert, InventoryItemWithUpdater, InventoryLogInsert, Profile } from '@/types/database'
 import { toast } from 'sonner'
 import LoginForm from '@/components/LoginForm'
 import Header from '@/components/Header'
@@ -16,7 +16,7 @@ import UploadCSVModal from '@/components/UploadCSVModal'
 export default function Home() {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [items, setItems] = useState<InventoryItem[]>([])
+  const [items, setItems] = useState<InventoryItemWithUpdater[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
@@ -24,7 +24,7 @@ export default function Home() {
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false)
   const [showUploadModal, setShowUploadModal] = useState(false)
-  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
+  const [editingItem, setEditingItem] = useState<InventoryItemWithUpdater | null>(null)
 
   useEffect(() => {
     // Check current session
@@ -47,7 +47,31 @@ export default function Home() {
       }
     })
 
-    return () => subscription.unsubscribe()
+    // Real-time subscription for inventory changes
+    const realtimeChannel = supabase
+      .channel('inventory_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'inventory_items' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            fetchInventory() // Refresh to get joined data
+            toast.info('📦 New item added by another user')
+          } else if (payload.eventType === 'UPDATE') {
+            fetchInventory() // Refresh to get joined data
+            toast.info('🔄 Inventory updated by another user')
+          } else if (payload.eventType === 'DELETE') {
+            setItems(prev => prev.filter(item => item.id !== payload.old.id))
+            toast.info('🗑️ Item removed by another user')
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      subscription.unsubscribe()
+      supabase.removeChannel(realtimeChannel)
+    }
   }, [])
 
   async function fetchProfile(userId: string) {
@@ -64,11 +88,14 @@ export default function Home() {
   async function fetchInventory() {
     const { data, error } = await supabase
       .from('inventory_items')
-      .select('*')
+      .select(`
+        *,
+        updater:profiles!inventory_items_updated_by_fkey(email, full_name)
+      `)
       .order('category', { ascending: true })
       .order('name', { ascending: true })
 
-    if (data) setItems(data)
+    if (data) setItems(data as InventoryItemWithUpdater[])
     if (error) {
       console.error('Error fetching inventory:', error)
       toast.error(`😱 ${getRandomQuote('error')}`)
@@ -105,11 +132,12 @@ export default function Home() {
     const item = items.find(i => i.id === itemId)
     if (!item) return
 
+    const now = new Date().toISOString()
     const { error } = await supabase
       .from('inventory_items')
       .update({
         current_count: newCount,
-        updated_at: new Date().toISOString(),
+        updated_at: now,
         updated_by: user?.id
       })
       .eq('id', itemId)
@@ -124,7 +152,14 @@ export default function Home() {
         action: 'count_update'
       })
 
-      setItems(items.map(i => i.id === itemId ? { ...i, current_count: newCount } : i))
+      // Update local state with new count and updater info
+      setItems(items.map(i => i.id === itemId ? {
+        ...i,
+        current_count: newCount,
+        updated_at: now,
+        updated_by: user?.id,
+        updater: profile ? { email: profile.email, full_name: profile.full_name } : null
+      } : i))
       setEditingItem(null)
 
       const diff = newCount - item.current_count

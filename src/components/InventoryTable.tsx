@@ -1,12 +1,27 @@
 'use client'
 
-import { InventoryItem, UserRole } from '@/types/database'
+import { InventoryItemWithUpdater, UserRole } from '@/types/database'
 
 interface InventoryTableProps {
-  items: InventoryItem[]
+  items: InventoryItemWithUpdater[]
   userRole: UserRole
-  onEditCount: (item: InventoryItem) => void
+  onEditCount: (item: InventoryItemWithUpdater) => void
   onDelete: (itemId: string) => void
+}
+
+function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 1) return 'just now'
+  if (diffMins < 60) return `${diffMins}m ago`
+  if (diffHours < 24) return `${diffHours}h ago`
+  if (diffDays < 7) return `${diffDays}d ago`
+  return date.toLocaleDateString()
 }
 
 export default function InventoryTable({ items, userRole, onEditCount, onDelete }: InventoryTableProps) {
@@ -61,7 +76,14 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
                     <span className="font-bold text-purple-600">{item.code}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="font-medium text-gray-800">{item.name}</span>
+                    <div>
+                      <span className="font-medium text-gray-800">{item.name}</span>
+                      {item.updater && (
+                        <div className="text-xs text-gray-400 mt-0.5">
+                          📝 {item.updater.full_name || item.updater.email.split('@')[0]} · {formatTimeAgo(item.updated_at)}
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-lg text-sm">

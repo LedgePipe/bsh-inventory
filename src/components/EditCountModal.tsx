@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { InventoryItem } from '@/types/database'
+import { InventoryItemWithUpdater } from '@/types/database'
 
 interface EditCountModalProps {
-  item: InventoryItem
+  item: InventoryItemWithUpdater
   onClose: () => void
   onSave: (itemId: string, newCount: number) => void
 }

@@ -116,3 +116,8 @@ export type InventoryItem = Database['public']['Tables']['inventory_items']['Row
 export type InventoryItemInsert = Database['public']['Tables']['inventory_items']['Insert']
 export type InventoryLog = Database['public']['Tables']['inventory_logs']['Row']
 export type InventoryLogInsert = Database['public']['Tables']['inventory_logs']['Insert']
+
+// Extended type with updater profile info
+export type InventoryItemWithUpdater = InventoryItem & {
+  updater?: { email: string; full_name: string | null } | null
+}
