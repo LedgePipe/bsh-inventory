@@ -45,7 +45,7 @@ export default function GlasswareTab({ userRole, userId, onCountChange, editedCo
       .channel('glassware_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'glassware_items' }, () => {
         fetchData()
-        toast.info('🥃 Glassware inventory updated')
+        toast('🥃 Glassware inventory updated')
       })
       .subscribe()
 

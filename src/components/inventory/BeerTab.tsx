@@ -72,7 +72,7 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
         { event: '*', schema: 'public', table: 'beer_items' },
         () => {
           fetchData()
-          toast.info('🍺 Beer inventory updated')
+          toast('🍺 Beer inventory updated')
         }
       )
       .on(

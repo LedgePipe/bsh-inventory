@@ -57,7 +57,7 @@ export default function WineTab({ userRole, userId, onCountChange, editedCounts 
       .channel('wine_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'wine_items' }, () => {
         fetchData()
-        toast.info('🍷 Wine inventory updated')
+        toast('🍷 Wine inventory updated')
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'distributors' }, () => fetchData())
       .subscribe()

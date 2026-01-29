@@ -43,7 +43,7 @@ export default function PepsiTab({ userRole, userId, onCountChange, editedCounts
       .channel('pepsi_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pepsi_items' }, () => {
         fetchData()
-        toast.info('🥤 Pepsi inventory updated')
+        toast('🥤 Pepsi inventory updated')
       })
       .subscribe()
 

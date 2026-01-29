@@ -56,13 +56,13 @@ export default function Home() {
         (payload) => {
           if (payload.eventType === 'INSERT') {
             fetchInventory() // Refresh to get joined data
-            toast.info('📦 New item added by another user')
+            toast('📦 New item added by another user')
           } else if (payload.eventType === 'UPDATE') {
             fetchInventory() // Refresh to get joined data
-            toast.info('🔄 Inventory updated by another user')
+            toast('🔄 Inventory updated by another user')
           } else if (payload.eventType === 'DELETE') {
             setItems(prev => prev.filter(item => item.id !== payload.old.id))
-            toast.info('🗑️ Item removed by another user')
+            toast('🗑️ Item removed by another user')
           }
         }
       )
@@ -107,7 +107,7 @@ export default function Home() {
     setUser(null)
     setProfile(null)
     setItems([])
-    toast.info(`👋 Signed out`)
+    toast(`👋 Signed out`)
   }
 
   async function handleAddItem(item: InventoryItemInsert) {
@@ -166,7 +166,7 @@ export default function Home() {
       if (diff > 0) {
         toast.success(`➕ Added ${diff} units`)
       } else if (diff < 0) {
-        toast.info(`➖ Removed ${Math.abs(diff)} units`)
+        toast(`➖ Removed ${Math.abs(diff)} units`)
       } else {
         toast.success(`✅ Count confirmed`)
       }
@@ -197,7 +197,7 @@ export default function Home() {
 
     if (!error) {
       setItems(items.filter(i => i.id !== itemId))
-      toast.info(`🗑️ ${item.name} removed`)
+      toast(`🗑️ ${item.name} removed`)
     } else {
       toast.error(`⚠️ ${getRandomQuote('error')}`)
     }
