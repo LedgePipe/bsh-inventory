@@ -1,48 +1,47 @@
-// Ralph Wiggum Quotes for every occasion!
+// Professional hospitality messages for BSH Inventory
 
 export const ralphQuotes = {
   login: [
-    "Hi, Super Nintendo Chalmers! I'm learnding to count bottles!",
-    "My cat's breath smells like cat food!",
-    "I'm Idaho!",
-    "Me fail inventory? That's unpossible!",
-    "The doctor said I wouldn't have so many nosebleeds if I kept my finger outta there!"
+    "Welcome to BSH Inventory",
+    "Ready to manage your stock",
+    "Let's keep things running smoothly",
+    "Your inventory awaits",
   ],
   welcome: [
-    "Hi! I'm helping with the bottles!",
-    "I bent my wookie... but the inventory is fine!",
-    "My brain is telling my fingers to count!",
-    "I'm learnding inventory management!"
+    "Signed in successfully!",
+    "Welcome back!",
+    "Good to see you!",
+    "Ready to go!",
   ],
   lowStock: [
-    "Uh oh! These bottles need more friends!",
-    "It's lonely in here! Need more bottles!",
-    "My tummy hurts... I mean, the stock is low!",
-    "Tastes like we need to order more!"
+    "Time to reorder",
+    "Stock is running low",
+    "Consider restocking soon",
+    "Below par level",
   ],
   success: [
-    "I did it! I'm a helper!",
-    "Go banana! I mean... it's saved!",
-    "My brain did a good job!",
-    "I'm special! And so is this inventory!"
+    "Done!",
+    "Got it!",
+    "Updated successfully",
+    "Changes saved",
   ],
   delete: [
-    "Bye bye, bottle friend!",
-    "That bottle moved to a farm upstate!",
-    "My cat took it... probably.",
-    "It's in a better place now!"
+    "Item removed",
+    "Successfully deleted",
+    "Removed from inventory",
+    "Deleted",
   ],
   error: [
-    "Uh oh! My brain hurts!",
-    "That tickles in a bad way!",
-    "Something went wrong... like that time I ate a crayon!",
-    "The computer is being mean to me!"
+    "Something went wrong",
+    "Please try again",
+    "Unable to complete",
+    "There was an issue",
   ],
   loading: [
-    "My brain is loading...",
-    "I'm thinking with my head!",
-    "The little wheel is spinning!",
-    "Almost there... I can count to potato!"
+    "Loading inventory...",
+    "Fetching data...",
+    "Just a moment...",
+    "Getting everything ready...",
   ]
 }
 

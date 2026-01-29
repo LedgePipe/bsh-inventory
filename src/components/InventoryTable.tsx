@@ -21,17 +21,17 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
   function getStatus(item: InventoryItem) {
     if (item.par_level === 0) return { class: 'bg-gray-100 text-gray-600', text: '➖ No Par', percent: 100 }
     const percent = (item.current_count / item.par_level) * 100
-    if (percent < 50) return { class: 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700', text: '😱 Uh Oh!', percent }
-    if (percent < 75) return { class: 'bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-700', text: '😐 Meh...', percent }
-    return { class: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700', text: '😊 Happy!', percent }
+    if (percent < 50) return { class: 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700', text: '🚨 Low', percent }
+    if (percent < 75) return { class: 'bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-700', text: '⚠️ Watch', percent }
+    return { class: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700', text: '✅ Good', percent }
   }
 
   if (items.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-        <div className="text-6xl mb-4">🍾😢</div>
-        <h3 className="text-xl font-bold text-gray-700 mb-2">No bottle friends found!</h3>
-        <p className="text-gray-500 italic">"My imaginary friend thinks there is nothing here... and he is right!"</p>
+        <div className="text-6xl mb-4">🍾</div>
+        <h3 className="text-xl font-bold text-gray-700 mb-2">No items found</h3>
+        <p className="text-gray-500">Add your first inventory item to get started</p>
       </div>
     )
   }

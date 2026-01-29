@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { InventoryItem } from '@/types/database'
-import { getRandomQuote } from '@/lib/ralph-quotes'
 
 interface EditCountModalProps {
   item: InventoryItem
@@ -36,22 +35,22 @@ export default function EditCountModal({ item, onClose, onSave }: EditCountModal
           ×
         </button>
 
-        <h3 className="text-xl font-bold text-gray-800 mb-2">🔢 Count the Bottles!</h3>
-        <p className="text-gray-500 text-sm italic mb-4">"1... 2... 3... I can count to potato!"</p>
+        <h3 className="text-xl font-bold text-gray-800 mb-2">🔢 Update Count</h3>
+        <p className="text-gray-500 text-sm mb-4">Enter the current quantity on hand</p>
 
         {/* Item info */}
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500 rounded-xl p-4 mb-6">
-          <p className="font-bold text-purple-700">{item.code}</p>
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-500 rounded-xl p-4 mb-6">
+          <p className="font-bold text-amber-700">{item.code}</p>
           <p className="text-gray-700">{item.name}</p>
           <p className="text-sm text-gray-500 mt-1">
-            We want <strong>{item.par_level}</strong> | We got <strong>{item.current_count}</strong>
+            Par: <strong>{item.par_level}</strong> | Current: <strong>{item.current_count}</strong>
           </p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-2">
-              How Many Bottles Do We Got?
+              New Count
             </label>
 
             {/* Big count input with +/- buttons */}
@@ -114,9 +113,9 @@ export default function EditCountModal({ item, onClose, onSave }: EditCountModal
 
           <button
             type="submit"
-            className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all transform hover:-translate-y-1"
+            className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all transform hover:-translate-y-1"
           >
-            💾 Save My Counting!
+            💾 Save Count
           </button>
         </form>
       </div>

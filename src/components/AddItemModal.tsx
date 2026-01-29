@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { InventoryItemInsert, InventoryCategory } from '@/types/database'
-import { getRandomQuote } from '@/lib/ralph-quotes'
 
 interface AddItemModalProps {
   onClose: () => void
@@ -40,47 +39,47 @@ export default function AddItemModal({ onClose, onAdd }: AddItemModalProps) {
           ×
         </button>
 
-        <h3 className="text-xl font-bold text-gray-800 mb-2">➕ Make a New Bottle Friend!</h3>
-        <p className="text-gray-500 text-sm italic mb-6">"{getRandomQuote('success')}"</p>
+        <h3 className="text-xl font-bold text-gray-800 mb-2">➕ Add New Item</h3>
+        <p className="text-gray-500 text-sm mb-6">Enter the product details below</p>
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label className="block text-gray-700 font-semibold mb-1 text-sm">
-                🏷️ Product Code Thingy
+                🏷️ Product Code
               </label>
               <input
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="Like a name tag!"
-                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none"
+                placeholder="SKU or internal code"
+                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-amber-400 focus:outline-none"
                 required
               />
             </div>
 
             <div>
               <label className="block text-gray-700 font-semibold mb-1 text-sm">
-                🍾 What's It Called?
+                🍾 Product Name
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="My bottle's name is..."
-                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none"
+                placeholder="Enter product name"
+                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-amber-400 focus:outline-none"
                 required
               />
             </div>
 
             <div>
               <label className="block text-gray-700 font-semibold mb-1 text-sm">
-                📁 What Kind of Friend?
+                📁 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as InventoryCategory)}
-                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none bg-white"
+                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-amber-400 focus:outline-none bg-white"
               >
                 <option value="liquor">🍾 Liquor</option>
                 <option value="beer">🍺 Beer</option>
@@ -99,8 +98,8 @@ export default function AddItemModal({ onClose, onAdd }: AddItemModalProps) {
                   type="number"
                   value={parLevel}
                   onChange={(e) => setParLevel(e.target.value)}
-                  placeholder="How many we want"
-                  className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none"
+                  placeholder="Target quantity"
+                  className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-amber-400 focus:outline-none"
                   required
                   min="0"
                 />
@@ -114,8 +113,8 @@ export default function AddItemModal({ onClose, onAdd }: AddItemModalProps) {
                   type="number"
                   value={cost}
                   onChange={(e) => setCost(e.target.value)}
-                  placeholder="$$$"
-                  className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none"
+                  placeholder="0.00"
+                  className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-amber-400 focus:outline-none"
                   step="0.01"
                   min="0"
                 />
@@ -129,7 +128,7 @@ export default function AddItemModal({ onClose, onAdd }: AddItemModalProps) {
               <select
                 value={unitType}
                 onChange={(e) => setUnitType(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none bg-white"
+                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-amber-400 focus:outline-none bg-white"
               >
                 <option value="bottle">🍾 Bottle</option>
                 <option value="case">📦 Case</option>
@@ -143,9 +142,9 @@ export default function AddItemModal({ onClose, onAdd }: AddItemModalProps) {
 
           <button
             type="submit"
-            className="w-full mt-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all transform hover:-translate-y-1"
+            className="w-full mt-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all transform hover:-translate-y-1"
           >
-            🎉 Add My New Friend!
+            ➕ Add Item
           </button>
         </form>
       </div>

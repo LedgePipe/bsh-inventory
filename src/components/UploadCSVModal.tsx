@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { InventoryItemInsert, InventoryCategory } from '@/types/database'
-import { getRandomQuote } from '@/lib/ralph-quotes'
 
 interface UploadCSVModalProps {
   onClose: () => void
@@ -55,10 +54,10 @@ export default function UploadCSVModal({ onClose, onUpload }: UploadCSVModalProp
         setPreview(items)
 
         if (items.length === 0) {
-          setError("Couldn't find any items in the file. Check the format!")
+          setError("No items found. Please check your CSV format.")
         }
       } catch (err) {
-        setError(getRandomQuote('error'))
+        setError("Error reading file. Please try again.")
       }
     }
     reader.readAsText(selectedFile)
@@ -80,8 +79,8 @@ export default function UploadCSVModal({ onClose, onUpload }: UploadCSVModalProp
           ×
         </button>
 
-        <h3 className="text-xl font-bold text-gray-800 mb-2">📤 Upload My Bottle Friends!</h3>
-        <p className="text-gray-500 text-sm italic mb-4">"I'm uploading! It tastes like burning!"</p>
+        <h3 className="text-xl font-bold text-gray-800 mb-2">📤 Import CSV</h3>
+        <p className="text-gray-500 text-sm mb-4">Bulk upload inventory items from a spreadsheet</p>
 
         {/* Format info */}
         <div className="bg-gray-50 rounded-xl p-4 mb-4 text-sm">
@@ -99,7 +98,7 @@ export default function UploadCSVModal({ onClose, onUpload }: UploadCSVModalProp
         <div className="mb-4">
           <label className="block w-full">
             <div className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
-              file ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-purple-400'
+              file ? 'border-green-400 bg-green-50' : 'border-gray-300 hover:border-amber-400'
             }`}>
               <input
                 type="file"
@@ -111,13 +110,13 @@ export default function UploadCSVModal({ onClose, onUpload }: UploadCSVModalProp
                 <>
                   <span className="text-4xl">📄</span>
                   <p className="mt-2 font-semibold text-green-700">{file.name}</p>
-                  <p className="text-sm text-green-600">{preview.length} items found!</p>
+                  <p className="text-sm text-green-600">{preview.length} items found</p>
                 </>
               ) : (
                 <>
                   <span className="text-4xl">📂</span>
-                  <p className="mt-2 text-gray-600">Click to choose a CSV file</p>
-                  <p className="text-xs text-gray-400">"The pointy end goes in the computer!"</p>
+                  <p className="mt-2 text-gray-600">Click to select CSV file</p>
+                  <p className="text-xs text-gray-400">or drag and drop</p>
                 </>
               )}
             </div>
@@ -126,25 +125,25 @@ export default function UploadCSVModal({ onClose, onUpload }: UploadCSVModalProp
 
         {error && (
           <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3 mb-4 text-red-600 text-sm">
-            🙈 {error}
+            ⚠️ {error}
           </div>
         )}
 
         {/* Preview */}
         {preview.length > 0 && (
           <div className="mb-4">
-            <p className="font-semibold text-gray-700 mb-2">👀 Preview (first 5):</p>
+            <p className="font-semibold text-gray-700 mb-2">Preview (first 5):</p>
             <div className="bg-gray-50 rounded-xl p-3 max-h-40 overflow-y-auto">
               {preview.slice(0, 5).map((item, idx) => (
                 <div key={idx} className="flex justify-between py-1 border-b border-gray-200 last:border-0 text-sm">
-                  <span className="font-medium text-purple-600">{item.code}</span>
+                  <span className="font-medium text-amber-600">{item.code}</span>
                   <span className="text-gray-700 flex-1 mx-2 truncate">{item.name}</span>
                   <span className="text-gray-500">Par: {item.par_level}</span>
                 </div>
               ))}
               {preview.length > 5 && (
                 <p className="text-center text-gray-400 text-xs mt-2">
-                  ...and {preview.length - 5} more friends!
+                  ...and {preview.length - 5} more items
                 </p>
               )}
             </div>
@@ -154,9 +153,9 @@ export default function UploadCSVModal({ onClose, onUpload }: UploadCSVModalProp
         <button
           onClick={handleUpload}
           disabled={preview.length === 0}
-          className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          🚀 Upload {preview.length} New Friends!
+          📤 Upload {preview.length} Items
         </button>
       </div>
     </div>

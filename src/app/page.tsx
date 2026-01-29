@@ -80,7 +80,7 @@ export default function Home() {
     setUser(null)
     setProfile(null)
     setItems([])
-    toast.info(`👋 ${getRandomQuote('delete')}`)
+    toast.info(`👋 Signed out`)
   }
 
   async function handleAddItem(item: InventoryItemInsert) {
@@ -93,10 +93,10 @@ export default function Home() {
     if (data) {
       setItems([...items, data])
       setShowAddModal(false)
-      toast.success(`🎉 ${item.name} is my new friend! ${getRandomQuote('success')}`)
+      toast.success(`✅ ${item.name} added successfully`)
     }
     if (error) {
-      toast.error(`😱 ${getRandomQuote('error')}`)
+      toast.error(`⚠️ ${getRandomQuote('error')}`)
       console.error(error)
     }
   }
@@ -129,21 +129,21 @@ export default function Home() {
 
       const diff = newCount - item.current_count
       if (diff > 0) {
-        toast.success(`➕ Added ${diff} bottles! ${getRandomQuote('success')}`)
+        toast.success(`➕ Added ${diff} units`)
       } else if (diff < 0) {
-        toast.info(`➖ ${Math.abs(diff)} bottles went bye-bye!`)
+        toast.info(`➖ Removed ${Math.abs(diff)} units`)
       } else {
-        toast.success(`✅ Same number! I counted good!`)
+        toast.success(`✅ Count confirmed`)
       }
 
       // Check if now low
       if (item.par_level > 0 && (newCount / item.par_level) < 0.5) {
         setTimeout(() => {
-          toast.warning(`⚠️ Uh oh! ${item.name} needs more friends!`)
+          toast.warning(`⚠️ ${item.name} is below par level`)
         }, 1000)
       }
     } else {
-      toast.error(`😱 ${getRandomQuote('error')}`)
+      toast.error(`⚠️ ${getRandomQuote('error')}`)
     }
   }
 
@@ -151,7 +151,7 @@ export default function Home() {
     const item = items.find(i => i.id === itemId)
     if (!item) return
 
-    if (!confirm(`Say bye-bye to ${item.name}? 👋\n\n"${getRandomQuote('delete')}"`)) {
+    if (!confirm(`Delete ${item.name}?\n\nThis action cannot be undone.`)) {
       return
     }
 
@@ -162,9 +162,9 @@ export default function Home() {
 
     if (!error) {
       setItems(items.filter(i => i.id !== itemId))
-      toast.info(`👋 ${item.name} moved to a farm upstate!`)
+      toast.info(`🗑️ ${item.name} removed`)
     } else {
-      toast.error(`😱 ${getRandomQuote('error')}`)
+      toast.error(`⚠️ ${getRandomQuote('error')}`)
     }
   }
 
@@ -177,10 +177,10 @@ export default function Home() {
     if (data) {
       setItems([...items, ...data])
       setShowUploadModal(false)
-      toast.success(`🎉 Made ${data.length} new friends! ${getRandomQuote('success')}`)
+      toast.success(`✅ Imported ${data.length} items`)
     }
     if (error) {
-      toast.error(`😱 ${getRandomQuote('error')}`)
+      toast.error(`⚠️ ${getRandomQuote('error')}`)
       console.error(error)
     }
   }
@@ -191,18 +191,18 @@ export default function Home() {
     )
 
     if (lowItems.length > 0) {
-      toast.warning(`🚨 Found ${lowItems.length} bottles that need friends! ${getRandomQuote('lowStock')}`, {
+      toast.warning(`🚨 ${lowItems.length} items below par level`, {
         duration: 5000
       })
 
       // Send browser notification if permitted
       if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(`🚨 ${lowItems.length} items are low!`, {
+        new Notification(`🚨 ${lowItems.length} items low stock`, {
           body: `${getRandomQuote('lowStock')}\n${lowItems.slice(0, 3).map(i => i.name).join(', ')}`,
         })
       }
     } else {
-      toast.success(`✅ All bottles have enough friends! ${getRandomQuote('success')}`)
+      toast.success(`✅ All items at or above par level`)
     }
   }
 
@@ -250,15 +250,15 @@ export default function Home() {
               <>
                 <button
                   onClick={() => setShowUploadModal(true)}
-                  className="btn-ralph bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2"
+                  className="btn-ralph bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2"
                 >
-                  📤 Upload Friends (CSV)
+                  📤 Import CSV
                 </button>
                 <button
                   onClick={() => setShowAddModal(true)}
                   className="btn-ralph bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-200"
                 >
-                  ➕ Make a New Friend!
+                  ➕ Add Item
                 </button>
               </>
             )}
@@ -267,16 +267,16 @@ export default function Home() {
               onClick={checkLowStock}
               className="btn-ralph bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-800 px-4 py-2 rounded-xl font-semibold flex items-center gap-2"
             >
-              🔔 Check for Uh-Ohs
+              🔔 Check Low Stock
             </button>
 
             <div className="flex-1 min-w-[200px]">
               <input
                 type="text"
-                placeholder="🔍 I'm looking for my friend..."
+                placeholder="🔍 Search items..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-colors"
+                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-amber-400 focus:outline-none transition-colors"
               />
             </div>
 

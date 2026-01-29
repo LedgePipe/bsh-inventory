@@ -27,34 +27,34 @@ export default function StatsCards({ items }: StatsCardsProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
       <StatCard
-        label="🍾 Total Friends"
+        label="🍾 Total Items"
         value={total}
-        subtitle="I can count this high!"
-        gradient="from-purple-500 to-pink-500"
+        subtitle="Products in inventory"
+        gradient="from-amber-500 to-orange-500"
       />
       <StatCard
-        label="😱 Need Friends!"
+        label="🚨 Low Stock"
         value={low}
-        subtitle="Tastes like danger!"
+        subtitle="Below 50% of par"
         gradient="from-red-500 to-pink-500"
         pulse={low > 0}
       />
       <StatCard
-        label="😐 Kinda Low"
+        label="⚠️ Getting Low"
         value={mid}
-        subtitle="My tummy feels funny"
+        subtitle="50-75% of par"
         gradient="from-yellow-400 to-orange-400"
       />
       <StatCard
-        label="😊 Happy Bottles!"
+        label="✅ Well Stocked"
         value={ok}
-        subtitle="These ones taste purple!"
+        subtitle="75%+ of par level"
         gradient="from-green-400 to-emerald-500"
       />
       <StatCard
         label="💰 Total Value"
         value={`$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-        subtitle="That's a lot of moneys!"
+        subtitle="Current inventory value"
         gradient="from-blue-500 to-purple-500"
         isLarge
       />
