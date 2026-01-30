@@ -33,9 +33,14 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
     supplies: '📦'
   }
 
+  function getTotal(item: InventoryItemWithUpdater) {
+    return item.current_count + (item.partial_count || 0)
+  }
+
   function getStatus(item: InventoryItemWithUpdater) {
     if (item.par_level === 0) return { class: 'bg-gray-100 text-gray-600', text: '➖ No Par', percent: 100 }
-    const percent = (item.current_count / item.par_level) * 100
+    const total = getTotal(item)
+    const percent = (total / item.par_level) * 100
     if (percent < 50) return { class: 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700', text: '🚨 Low', percent }
     if (percent < 75) return { class: 'bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-700', text: '⚠️ Watch', percent }
     return { class: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700', text: '✅ Good', percent }
@@ -61,7 +66,9 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">🍾 Name</th>
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider hidden md:table-cell">📦 Category</th>
               <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">📊 Par</th>
-              <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">🔢 Count</th>
+              <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">🍾 Full</th>
+              <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">½ Partial</th>
+              <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">🔢 Total</th>
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">💭 Status</th>
               <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider hidden lg:table-cell">💰 Cost</th>
               <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">🎮 Actions</th>
@@ -93,6 +100,12 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
                   <td className="px-4 py-3 text-center font-medium">{item.par_level}</td>
                   <td className="px-4 py-3 text-center">
                     <span className="font-bold text-lg">{item.current_count}</span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className="text-slate-600">{item.partial_count || 0}</span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className="font-bold text-lg text-slate-700">{getTotal(item).toFixed(1)}</span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold ${status.class}`}>

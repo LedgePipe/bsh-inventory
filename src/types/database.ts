@@ -39,6 +39,7 @@ export interface Database {
           category: InventoryCategory
           par_level: number
           current_count: number
+          partial_count: number
           cost_per_unit: number
           unit_type: string
           notes: string | null
@@ -53,6 +54,7 @@ export interface Database {
           category?: InventoryCategory
           par_level: number
           current_count?: number
+          partial_count?: number
           cost_per_unit?: number
           unit_type?: string
           notes?: string | null
@@ -67,6 +69,7 @@ export interface Database {
           category?: InventoryCategory
           par_level?: number
           current_count?: number
+          partial_count?: number
           cost_per_unit?: number
           unit_type?: string
           notes?: string | null

@@ -12,6 +12,15 @@ import InventoryTable from '@/components/InventoryTable'
 import AddItemModal from '@/components/AddItemModal'
 import EditCountModal from '@/components/EditCountModal'
 import UploadCSVModal from '@/components/UploadCSVModal'
+import GenerateOrderModal from '@/components/inventory/GenerateOrderModal'
+
+interface LiquorOrderItem {
+  id: string
+  productName: string
+  currentCount: number
+  parLevel: number
+  orderQty: number
+}
 
 export default function Home() {
   const [user, setUser] = useState<any>(null)
@@ -25,6 +34,8 @@ export default function Home() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [editingItem, setEditingItem] = useState<InventoryItemWithUpdater | null>(null)
+  const [showOrderModal, setShowOrderModal] = useState(false)
+  const [orderItems, setOrderItems] = useState<LiquorOrderItem[]>([])
 
   useEffect(() => {
     // Check current session
@@ -128,7 +139,7 @@ export default function Home() {
     }
   }
 
-  async function handleUpdateCount(itemId: string, newCount: number) {
+  async function handleUpdateCount(itemId: string, newCount: number, newPartial: number = 0) {
     const item = items.find(i => i.id === itemId)
     if (!item) return
 
@@ -137,6 +148,7 @@ export default function Home() {
       .from('inventory_items')
       .update({
         current_count: newCount,
+        partial_count: newPartial,
         updated_at: now,
         updated_by: user?.id
       })
@@ -144,6 +156,8 @@ export default function Home() {
 
     if (!error) {
       // Also create a log entry
+      const oldTotal = item.current_count + (item.partial_count || 0)
+      const newTotal = newCount + newPartial
       await supabase.from('inventory_logs').insert({
         item_id: itemId,
         user_id: user?.id || '',
@@ -156,23 +170,24 @@ export default function Home() {
       setItems(items.map(i => i.id === itemId ? {
         ...i,
         current_count: newCount,
+        partial_count: newPartial,
         updated_at: now,
         updated_by: user?.id,
         updater: profile ? { email: profile.email, full_name: profile.full_name } : null
       } : i))
       setEditingItem(null)
 
-      const diff = newCount - item.current_count
+      const diff = newTotal - oldTotal
       if (diff > 0) {
-        toast.success(`➕ Added ${diff} units`)
+        toast.success(`➕ Added ${diff.toFixed(1)} units`)
       } else if (diff < 0) {
-        toast(`➖ Removed ${Math.abs(diff)} units`)
+        toast(`➖ Removed ${Math.abs(diff).toFixed(1)} units`)
       } else {
         toast.success(`✅ Count confirmed`)
       }
 
       // Check if now low
-      if (item.par_level > 0 && (newCount / item.par_level) < 0.5) {
+      if (item.par_level > 0 && (newTotal / item.par_level) < 0.5) {
         setTimeout(() => {
           toast.warning(`⚠️ ${item.name} is below par level`)
         }, 1000)
@@ -221,9 +236,10 @@ export default function Home() {
   }
 
   function checkLowStock() {
-    const lowItems = items.filter(item =>
-      item.par_level > 0 && (item.current_count / item.par_level) < 0.5
-    )
+    const lowItems = items.filter(item => {
+      const total = item.current_count + (item.partial_count || 0)
+      return item.par_level > 0 && (total / item.par_level) < 0.5
+    })
 
     if (lowItems.length > 0) {
       toast.warning(`🚨 ${lowItems.length} items below par level`, {
@@ -239,6 +255,25 @@ export default function Home() {
     } else {
       toast.success(`✅ All items at or above par level`)
     }
+  }
+
+  function handleGenerateOrder() {
+    // Map items to order format, calculating total and order qty
+    const orderData: LiquorOrderItem[] = items
+      .filter(item => item.category === 'liquor') // Only liquor items
+      .map(item => {
+        const total = item.current_count + (item.partial_count || 0)
+        return {
+          id: item.id,
+          productName: item.name,
+          currentCount: total,
+          parLevel: item.par_level,
+          orderQty: Math.max(0, Math.ceil(item.par_level - total)),
+        }
+      })
+
+    setOrderItems(orderData)
+    setShowOrderModal(true)
   }
 
   // Filter items
@@ -305,6 +340,13 @@ export default function Home() {
               🔔 Check Low Stock
             </button>
 
+            <button
+              onClick={handleGenerateOrder}
+              className="btn-ralph bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2"
+            >
+              📦 Generate Order
+            </button>
+
             <div className="flex-1 min-w-[200px]">
               <input
                 type="text"
@@ -359,6 +401,16 @@ export default function Home() {
           item={editingItem}
           onClose={() => setEditingItem(null)}
           onSave={handleUpdateCount}
+        />
+      )}
+
+      {showOrderModal && profile && (
+        <GenerateOrderModal
+          orderType="liquor"
+          items={orderItems}
+          userId={user.id}
+          userName={profile.full_name || profile.email || 'Unknown'}
+          onClose={() => setShowOrderModal(false)}
         />
       )}
     </main>
