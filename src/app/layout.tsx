@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: 'BSH Inventory - I\'m Helping!',
   description: 'Bradshaw Social House Inventory Management - Ralph Wiggum Edition',
   manifest: '/manifest.json',
-  themeColor: '#ee5a24',
+  themeColor: '#475569',
 }
 
 export default function RootLayout({
