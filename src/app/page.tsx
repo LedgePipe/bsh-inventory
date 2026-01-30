@@ -285,7 +285,7 @@ export default function Home() {
               <>
                 <button
                   onClick={() => setShowUploadModal(true)}
-                  className="btn-ralph bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2"
+                  className="btn-ralph bg-gradient-to-r from-slate-600 to-slate-700 text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2"
                 >
                   📤 Import CSV
                 </button>
@@ -300,7 +300,7 @@ export default function Home() {
 
             <button
               onClick={checkLowStock}
-              className="btn-ralph bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-800 px-4 py-2 rounded-xl font-semibold flex items-center gap-2"
+              className="btn-ralph bg-gradient-to-r from-slate-500 to-slate-600 text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2"
             >
               🔔 Check Low Stock
             </button>
@@ -311,14 +311,14 @@ export default function Home() {
                 placeholder="🔍 Search items..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-amber-400 focus:outline-none transition-colors"
+                className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-slate-400 focus:outline-none transition-colors"
               />
             </div>
 
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none bg-white"
+              className="px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-slate-400 focus:outline-none bg-white"
             >
               <option value="all">🏷️ All Categories</option>
               <option value="liquor">🍾 Liquor</option>

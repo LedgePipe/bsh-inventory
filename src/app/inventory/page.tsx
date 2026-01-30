@@ -153,7 +153,7 @@ export default function InventoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-gray-100 flex items-center justify-center">
         <div className="text-2xl">🍺 Loading inventory...</div>
       </div>
     )
@@ -164,7 +164,7 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-gray-100">
       <Toaster position="top-right" />
       <Header user={user} />
 
@@ -186,7 +186,7 @@ export default function InventoryPage() {
               }}
               className={`px-6 py-3 rounded-xl font-bold text-lg transition-all whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg scale-105'
+                  ? 'bg-gradient-to-r from-slate-600 to-slate-700 text-white shadow-lg scale-105'
                   : 'bg-white text-gray-600 hover:bg-gray-100 shadow'
               }`}
             >

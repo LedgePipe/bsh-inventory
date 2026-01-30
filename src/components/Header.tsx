@@ -43,7 +43,7 @@ export default function Header({ user, profile, onLogout }: HeaderProps) {
   ]
 
   return (
-    <header className="bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg sticky top-0 z-50">
+    <header className="bg-gradient-to-r from-slate-700 to-slate-800 text-white shadow-lg sticky top-0 z-50">
       {/* Top bar with logo and user info */}
       <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -67,7 +67,7 @@ export default function Header({ user, profile, onLogout }: HeaderProps) {
       </div>
 
       {/* Main Navigation - Large and Prominent */}
-      <nav className="bg-gradient-to-r from-amber-700 to-orange-700 border-t border-white/20">
+      <nav className="bg-gradient-to-r from-slate-800 to-slate-900 border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-2">
           <div className="flex gap-3">
             {navLinks.map((link) => (
@@ -76,15 +76,15 @@ export default function Header({ user, profile, onLogout }: HeaderProps) {
                 href={link.href}
                 className={`flex-1 sm:flex-none px-6 py-3 rounded-xl font-bold text-center transition-all ${
                   pathname === link.href
-                    ? 'bg-white text-amber-600 shadow-lg scale-105'
-                    : 'bg-white/10 hover:bg-white/20 text-white border-2 border-white/30'
+                    ? 'bg-white text-slate-700 shadow-lg scale-105'
+                    : 'bg-white/10 hover:bg-white/20 text-white border-2 border-white/20'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-2xl">{link.emoji}</span>
                   <div className="text-left">
                     <div className="text-sm sm:text-base">{link.label}</div>
-                    <div className={`text-xs ${pathname === link.href ? 'text-amber-500' : 'opacity-70'} hidden sm:block`}>
+                    <div className={`text-xs ${pathname === link.href ? 'text-slate-500' : 'opacity-70'} hidden sm:block`}>
                       {link.description}
                     </div>
                   </div>
