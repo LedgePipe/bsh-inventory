@@ -3,7 +3,7 @@
 import { Profile } from '@/types/database'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
 interface HeaderProps {
@@ -15,7 +15,6 @@ interface HeaderProps {
 export default function Header({ user, profile, onLogout }: HeaderProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = createClientComponentClient()
 
   const roleEmoji: Record<string, string> = {
     admin: '👑',

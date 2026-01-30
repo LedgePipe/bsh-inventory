@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { toast, Toaster } from 'react-hot-toast'
 import Header from '@/components/Header'
@@ -28,7 +28,6 @@ export default function InventoryPage() {
   const [editedCounts, setEditedCounts] = useState<Map<string, EditedCount>>(new Map())
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const supabase = createClientComponentClient()
   const router = useRouter()
 
   useEffect(() => {
@@ -54,7 +53,7 @@ export default function InventoryPage() {
     }
 
     loadUser()
-  }, [supabase, router])
+  }, [router])
 
   const handleCountChange = (itemId: string, newCount: number, productName: string, parLevel: number) => {
     setEditedCounts(prev => {

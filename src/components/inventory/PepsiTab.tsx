@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabase'
 import { toast } from 'react-hot-toast'
 import { PepsiItem, PepsiItemWithCounter, UserRole, EditedCount } from '@/types/database'
 
@@ -16,8 +16,6 @@ export default function PepsiTab({ userRole, userId, onCountChange, editedCounts
   const [items, setItems] = useState<PepsiItemWithCounter[]>([])
   const [loading, setLoading] = useState(true)
   const [editingPar, setEditingPar] = useState<string | null>(null)
-
-  const supabase = createClientComponentClient()
 
   async function fetchData() {
     const { data, error } = await supabase

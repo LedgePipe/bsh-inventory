@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabase'
 import { toast } from 'react-hot-toast'
 
 interface AddWineItemModalProps {
@@ -15,8 +15,6 @@ export default function AddWineItemModal({ distributorId, onClose, onSuccess }: 
   const [bottleSize, setBottleSize] = useState('750ml')
   const [parLevel, setParLevel] = useState(0)
   const [loading, setLoading] = useState(false)
-
-  const supabase = createClientComponentClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

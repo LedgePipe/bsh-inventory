@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabase'
 import { toast } from 'react-hot-toast'
 import { GlasswareItem, GlasswareItemWithCounter, UserRole, EditedCount } from '@/types/database'
 
@@ -18,8 +18,6 @@ export default function GlasswareTab({ userRole, userId, onCountChange, editedCo
   const [editingPar, setEditingPar] = useState<string | null>(null)
   const [showAddItem, setShowAddItem] = useState(false)
   const [newItemName, setNewItemName] = useState('')
-
-  const supabase = createClientComponentClient()
 
   async function fetchData() {
     const { data, error } = await supabase

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabase'
 import { toast } from 'react-hot-toast'
 import { Distributor, BeerItem, BeerItemWithDistributor, UserRole, EditedCount } from '@/types/database'
 import AddDistributorModal from './AddDistributorModal'
@@ -22,8 +22,6 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
   const [showAddDistributor, setShowAddDistributor] = useState(false)
   const [showAddItem, setShowAddItem] = useState(false)
   const [editingPar, setEditingPar] = useState<string | null>(null)
-
-  const supabase = createClientComponentClient()
 
   async function fetchData() {
     // Fetch distributors (beer only)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from '@/lib/supabase'
 import { toast } from 'react-hot-toast'
 import { DistributorCategory } from '@/types/database'
 
@@ -15,8 +15,6 @@ export default function AddDistributorModal({ category, onClose, onSuccess }: Ad
   const [name, setName] = useState('')
   const [reminderDays, setReminderDays] = useState('Mon,Wed')
   const [loading, setLoading] = useState(false)
-
-  const supabase = createClientComponentClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
