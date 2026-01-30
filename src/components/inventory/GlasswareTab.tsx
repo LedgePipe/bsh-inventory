@@ -24,14 +24,12 @@ export default function GlasswareTab({ userRole, userId, onCountChange, editedCo
   async function fetchData() {
     const { data, error } = await supabase
       .from('glassware_items')
-      .select(`
-        *,
-        counter:profiles!glassware_items_last_counted_by_fkey(email, full_name)
-      `)
+      .select('*')
       .order('product_name')
 
     if (error) {
       console.error('Error fetching glassware items:', error)
+      toast.error('Failed to load glassware items')
     } else {
       setItems(data || [])
     }

@@ -22,14 +22,12 @@ export default function PepsiTab({ userRole, userId, onCountChange, editedCounts
   async function fetchData() {
     const { data, error } = await supabase
       .from('pepsi_items')
-      .select(`
-        *,
-        counter:profiles!pepsi_items_last_counted_by_fkey(email, full_name)
-      `)
+      .select('*')
       .order('product_name')
 
     if (error) {
       console.error('Error fetching pepsi items:', error)
+      toast.error('Failed to load Pepsi items')
     } else {
       setItems(data || [])
     }

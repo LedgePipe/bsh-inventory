@@ -42,18 +42,18 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
       }
     }
 
-    // Fetch beer items with counter info
+    // Fetch beer items with distributor info
     const { data: itemData, error: itemError } = await supabase
       .from('beer_items')
       .select(`
         *,
-        distributor:distributors(*),
-        counter:profiles!beer_items_last_counted_by_fkey(email, full_name)
+        distributor:distributors(*)
       `)
       .order('product_name')
 
     if (itemError) {
       console.error('Error fetching beer items:', itemError)
+      toast.error('Failed to load beer items')
     } else {
       setItems(itemData || [])
     }

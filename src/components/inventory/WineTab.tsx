@@ -37,15 +37,18 @@ export default function WineTab({ userRole, userId, onCountChange, editedCounts 
       setActiveDistributor(distData[0].id)
     }
 
-    const { data: itemData } = await supabase
+    const { data: itemData, error: itemError } = await supabase
       .from('wine_items')
       .select(`
         *,
-        distributor:distributors(*),
-        counter:profiles!wine_items_last_counted_by_fkey(email, full_name)
+        distributor:distributors(*)
       `)
       .order('product_name')
 
+    if (itemError) {
+      console.error('Error fetching wine items:', itemError)
+      toast.error('Failed to load wine items')
+    }
     setItems(itemData || [])
     setLoading(false)
   }
