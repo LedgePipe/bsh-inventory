@@ -340,13 +340,6 @@ export default function Home() {
               🔔 Check Low Stock
             </button>
 
-            <button
-              onClick={handleGenerateOrder}
-              className="btn-ralph bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2"
-            >
-              📦 Generate Order
-            </button>
-
             <div className="flex-1 min-w-[200px]">
               <input
                 type="text"
@@ -373,12 +366,26 @@ export default function Home() {
         </div>
 
         {/* Inventory Table */}
-        <InventoryTable
-          items={filteredItems}
-          userRole={profile?.role || 'staff'}
-          onEditCount={(item) => setEditingItem(item)}
-          onDelete={handleDeleteItem}
-        />
+        <div className="mb-24">
+          <InventoryTable
+            items={filteredItems}
+            userRole={profile?.role || 'staff'}
+            onEditCount={(item) => setEditingItem(item)}
+            onDelete={handleDeleteItem}
+          />
+        </div>
+      </div>
+
+      {/* Sticky Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 p-4 shadow-lg">
+        <div className="max-w-7xl mx-auto flex items-center justify-end">
+          <button
+            onClick={handleGenerateOrder}
+            className="px-6 py-3 rounded-xl font-bold text-lg transition-all bg-gradient-to-r from-slate-600 to-slate-700 text-white hover:from-slate-700 hover:to-slate-800 shadow-lg"
+          >
+            📦 Generate Order
+          </button>
+        </div>
       </div>
 
       {/* Modals */}
