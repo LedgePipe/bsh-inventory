@@ -152,7 +152,7 @@ export default function Home() {
     }
   }
 
-  async function handleUpdateCount(itemId: string, newCount: number, newPartial: number = 0) {
+  async function handleUpdateCount(itemId: string, newCount: number) {
     const item = items.find(i => i.id === itemId)
     if (!item) return
 
@@ -161,7 +161,6 @@ export default function Home() {
       .from('inventory_items')
       .update({
         current_count: newCount,
-        partial_count: newPartial,
         updated_at: now,
         updated_by: user?.id
       })
@@ -169,8 +168,6 @@ export default function Home() {
 
     if (!error) {
       // Also create a log entry
-      const oldTotal = item.current_count + (item.partial_count || 0)
-      const newTotal = newCount + newPartial
       await supabase.from('inventory_logs').insert({
         item_id: itemId,
         user_id: user?.id || '',
@@ -183,24 +180,24 @@ export default function Home() {
       setItems(items.map(i => i.id === itemId ? {
         ...i,
         current_count: newCount,
-        partial_count: newPartial,
         updated_at: now,
         updated_by: user?.id,
         updater: profile ? { email: profile.email, full_name: profile.full_name } : null
       } : i))
       setEditingItem(null)
 
-      const diff = newTotal - oldTotal
+      const diff = newCount - item.current_count
       if (diff > 0) {
-        toast.success(`➕ Added ${diff.toFixed(1)} units`)
+        toast.success(`➕ Added ${diff} bottles`)
       } else if (diff < 0) {
-        toast(`➖ Removed ${Math.abs(diff).toFixed(1)} units`)
+        toast(`➖ Removed ${Math.abs(diff)} bottles`)
       } else {
         toast.success(`✅ Count confirmed`)
       }
 
-      // Check if now low
-      if (item.par_level > 0 && (newTotal / item.par_level) < 0.5) {
+      // Check if now low (include existing partials in total)
+      const total = newCount + (item.partial_count || 0)
+      if (item.par_level > 0 && (total / item.par_level) < 0.5) {
         setTimeout(() => {
           toast.warning(`⚠️ ${item.name} is below par level`)
         }, 1000)

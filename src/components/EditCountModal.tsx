@@ -6,16 +6,15 @@ import { InventoryItemWithUpdater } from '@/types/database'
 interface EditCountModalProps {
   item: InventoryItemWithUpdater
   onClose: () => void
-  onSave: (itemId: string, newCount: number, newPartial: number) => void
+  onSave: (itemId: string, newCount: number) => void
 }
 
 export default function EditCountModal({ item, onClose, onSave }: EditCountModalProps) {
   const [count, setCount] = useState(item.current_count.toString())
-  const [partial, setPartial] = useState((item.partial_count || 0).toString())
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    onSave(item.id, parseInt(count) || 0, parseFloat(partial) || 0)
+    onSave(item.id, parseInt(count) || 0)
   }
 
   function adjustCount(delta: number) {
@@ -24,10 +23,7 @@ export default function EditCountModal({ item, onClose, onSave }: EditCountModal
   }
 
   const newCount = parseInt(count) || 0
-  const newPartial = parseFloat(partial) || 0
-  const oldTotal = item.current_count + (item.partial_count || 0)
-  const newTotal = newCount + newPartial
-  const diff = newTotal - oldTotal
+  const diff = newCount - item.current_count
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={onClose}>
@@ -40,14 +36,14 @@ export default function EditCountModal({ item, onClose, onSave }: EditCountModal
         </button>
 
         <h3 className="text-xl font-bold text-gray-800 mb-2">🔢 Update Count</h3>
-        <p className="text-gray-500 text-sm mb-4">Enter full bottles + partial (tenths)</p>
+        <p className="text-gray-500 text-sm mb-4">Enter full bottles count</p>
 
         {/* Item info */}
         <div className="bg-gradient-to-r from-slate-50 to-gray-100 border-l-4 border-slate-500 rounded-xl p-4 mb-6">
           <p className="font-bold text-slate-700">{item.code}</p>
           <p className="text-gray-700">{item.name}</p>
           <p className="text-sm text-gray-500 mt-1">
-            Par: <strong>{item.par_level}</strong> | Current: <strong>{oldTotal.toFixed(1)}</strong>
+            Par: <strong>{item.par_level}</strong> | Current: <strong>{item.current_count}</strong>
           </p>
         </div>
 
@@ -100,36 +96,13 @@ export default function EditCountModal({ item, onClose, onSave }: EditCountModal
             </div>
           </div>
 
-          {/* Partial bottle */}
-          <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-2">
-              ½ Partial Bottle (tenths)
-            </label>
-            <div className="grid grid-cols-5 gap-2">
-              {[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9].map((val) => (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => setPartial(val.toString())}
-                  className={`py-2 rounded-lg text-sm font-bold transition-colors ${
-                    parseFloat(partial) === val
-                      ? 'bg-slate-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  .{(val * 10).toFixed(0)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Total and diff */}
+          {/* New count and diff */}
           <div className="bg-slate-50 rounded-xl p-4 mb-4 text-center">
-            <div className="text-sm text-gray-500 mb-1">New Total</div>
-            <div className="text-3xl font-bold text-slate-700">{newTotal.toFixed(1)}</div>
+            <div className="text-sm text-gray-500 mb-1">New Count</div>
+            <div className="text-3xl font-bold text-slate-700">{newCount}</div>
             {diff !== 0 && (
               <div className={`text-sm mt-2 ${diff > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {diff > 0 ? `➕ +${diff.toFixed(1)}` : `➖ ${diff.toFixed(1)}`}
+                {diff > 0 ? `➕ +${diff}` : `➖ ${diff}`}
               </div>
             )}
           </div>
