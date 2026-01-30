@@ -65,13 +65,16 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">🏷️ Code</th>
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">🍾 Name</th>
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider hidden md:table-cell">📦 Category</th>
+              <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">🔢 Count</th>
               <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">📊 Par</th>
               <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">🍾 Full</th>
               <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">½ Partial</th>
               <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">🔢 Total</th>
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">💭 Status</th>
               <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider hidden lg:table-cell">💰 Cost</th>
-              <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">🎮 Actions</th>
+              {userRole === 'admin' && (
+                <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">🗑️</th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -97,6 +100,14 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
                       {categoryEmoji[item.category]} {item.category}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => onEditCount(item)}
+                      className="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      🔢 Count
+                    </button>
+                  </td>
                   <td className="px-4 py-3 text-center font-medium">{item.par_level}</td>
                   <td className="px-4 py-3 text-center">
                     <span className="font-bold text-lg">{item.current_count}</span>
@@ -115,24 +126,16 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
                   <td className="px-4 py-3 text-right hidden lg:table-cell">
                     <span className="text-gray-600">${Number(item.cost_per_unit).toFixed(2)}</span>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-center gap-2">
+                  {userRole === 'admin' && (
+                    <td className="px-4 py-3 text-center">
                       <button
-                        onClick={() => onEditCount(item)}
-                        className="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg text-sm font-medium transition-colors"
+                        onClick={() => onDelete(item.id)}
+                        className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors"
                       >
-                        🔢 Count
+                        🗑️
                       </button>
-                      {userRole === 'admin' && (
-                        <button
-                          onClick={() => onDelete(item.id)}
-                          className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors"
-                        >
-                          👋
-                        </button>
-                      )}
-                    </div>
-                  </td>
+                    </td>
+                  )}
                 </tr>
               )
             })}
