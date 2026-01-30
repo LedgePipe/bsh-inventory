@@ -13,6 +13,7 @@ import AddItemModal from '@/components/AddItemModal'
 import EditCountModal from '@/components/EditCountModal'
 import UploadCSVModal from '@/components/UploadCSVModal'
 import GenerateOrderModal from '@/components/inventory/GenerateOrderModal'
+import LiquorPartialsTab from '@/components/LiquorPartialsTab'
 
 interface LiquorOrderItem {
   id: string
@@ -21,6 +22,14 @@ interface LiquorOrderItem {
   parLevel: number
   orderQty: number
 }
+
+interface PartialEdit {
+  itemId: string
+  partial: number
+  itemName: string
+}
+
+type LiquorTabType = 'full' | 'partials'
 
 export default function Home() {
   const [user, setUser] = useState<any>(null)
@@ -36,6 +45,10 @@ export default function Home() {
   const [editingItem, setEditingItem] = useState<InventoryItemWithUpdater | null>(null)
   const [showOrderModal, setShowOrderModal] = useState(false)
   const [orderItems, setOrderItems] = useState<LiquorOrderItem[]>([])
+
+  // Liquor tab state
+  const [liquorTab, setLiquorTab] = useState<LiquorTabType>('full')
+  const [editedPartials, setEditedPartials] = useState<Map<string, PartialEdit>>(new Map())
 
   useEffect(() => {
     // Check current session
@@ -276,6 +289,57 @@ export default function Home() {
     setShowOrderModal(true)
   }
 
+  function handlePartialChange(itemId: string, partial: number, itemName: string) {
+    setEditedPartials(prev => {
+      const newMap = new Map(prev)
+      newMap.set(itemId, { itemId, partial, itemName })
+      return newMap
+    })
+  }
+
+  async function handleSubmitPartials() {
+    if (editedPartials.size === 0) {
+      toast('No partial changes to submit')
+      return
+    }
+
+    const updates = Array.from(editedPartials.values())
+    let successCount = 0
+
+    for (const update of updates) {
+      const item = items.find(i => i.id === update.itemId)
+      if (!item) continue
+
+      const now = new Date().toISOString()
+      const { error } = await supabase
+        .from('inventory_items')
+        .update({
+          partial_count: update.partial,
+          updated_at: now,
+          updated_by: user?.id
+        })
+        .eq('id', update.itemId)
+
+      if (!error) {
+        successCount++
+        // Log the change
+        await supabase.from('inventory_logs').insert({
+          item_id: update.itemId,
+          user_id: user?.id || '',
+          previous_count: item.current_count,
+          new_count: item.current_count,
+          action: 'partial_update'
+        })
+      }
+    }
+
+    if (successCount > 0) {
+      toast.success(`✅ Updated ${successCount} partial bottle${successCount > 1 ? 's' : ''}`)
+      setEditedPartials(new Map())
+      fetchInventory() // Refresh data
+    }
+  }
+
   // Filter items
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -365,20 +429,66 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Inventory Table */}
+        {/* Liquor Tabs */}
+        <div className="bg-white rounded-2xl shadow-lg p-2 mb-4">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setLiquorTab('full')}
+              className={`flex-1 py-3 px-4 rounded-xl font-bold text-lg transition-all ${
+                liquorTab === 'full'
+                  ? 'bg-gradient-to-r from-slate-600 to-slate-700 text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              🍾 Full Bottles
+            </button>
+            <button
+              onClick={() => setLiquorTab('partials')}
+              className={`flex-1 py-3 px-4 rounded-xl font-bold text-lg transition-all ${
+                liquorTab === 'partials'
+                  ? 'bg-gradient-to-r from-slate-600 to-slate-700 text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              ½ Partials {editedPartials.size > 0 && (
+                <span className="ml-2 bg-white text-slate-700 px-2 py-0.5 rounded-full text-sm">
+                  {editedPartials.size}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
         <div className="mb-24">
-          <InventoryTable
-            items={filteredItems}
-            userRole={profile?.role || 'staff'}
-            onEditCount={(item) => setEditingItem(item)}
-            onDelete={handleDeleteItem}
-          />
+          {liquorTab === 'full' ? (
+            <InventoryTable
+              items={filteredItems}
+              userRole={profile?.role || 'staff'}
+              onEditCount={(item) => setEditingItem(item)}
+              onDelete={handleDeleteItem}
+            />
+          ) : (
+            <LiquorPartialsTab
+              items={items}
+              editedPartials={editedPartials}
+              onPartialChange={handlePartialChange}
+            />
+          )}
         </div>
       </div>
 
       {/* Sticky Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 p-4 shadow-lg">
-        <div className="max-w-7xl mx-auto flex items-center justify-end">
+        <div className="max-w-7xl mx-auto flex items-center justify-end gap-3">
+          {liquorTab === 'partials' && editedPartials.size > 0 && (
+            <button
+              onClick={handleSubmitPartials}
+              className="px-6 py-3 rounded-xl font-bold text-lg transition-all bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg"
+            >
+              ✅ Submit Partials ({editedPartials.size})
+            </button>
+          )}
           <button
             onClick={handleGenerateOrder}
             className="px-6 py-3 rounded-xl font-bold text-lg transition-all bg-gradient-to-r from-slate-600 to-slate-700 text-white hover:from-slate-700 hover:to-slate-800 shadow-lg"

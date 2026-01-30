@@ -16,7 +16,7 @@ interface OrderItem {
 }
 
 interface GenerateOrderModalProps {
-  orderType: 'beer' | 'wine' | 'pepsi' | 'glassware'
+  orderType: 'liquor' | 'beer' | 'wine' | 'pepsi' | 'glassware'
   items: OrderItem[]
   distributorName?: string
   userId: string
