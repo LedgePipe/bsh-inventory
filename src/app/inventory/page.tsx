@@ -9,7 +9,17 @@ import BeerTab from '@/components/inventory/BeerTab'
 import WineTab from '@/components/inventory/WineTab'
 import PepsiTab from '@/components/inventory/PepsiTab'
 import GlasswareTab from '@/components/inventory/GlasswareTab'
+import GenerateOrderModal from '@/components/inventory/GenerateOrderModal'
 import { Profile, UserRole, SubmissionType, EditedCount } from '@/types/database'
+
+interface OrderItem {
+  id: string
+  productName: string
+  currentCount: number
+  parLevel: number
+  orderQty: number
+  distributor?: string
+}
 
 type TabType = 'beer' | 'wine' | 'pepsi' | 'glassware'
 
@@ -27,6 +37,9 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true)
   const [editedCounts, setEditedCounts] = useState<Map<string, EditedCount>>(new Map())
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showOrderModal, setShowOrderModal] = useState(false)
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([])
+  const [orderDistributor, setOrderDistributor] = useState<string | undefined>()
 
   const router = useRouter()
 
@@ -65,6 +78,46 @@ export default function InventoryPage() {
 
   const handleClearEdits = () => {
     setEditedCounts(new Map())
+  }
+
+  const handleGenerateOrder = async () => {
+    // Fetch items from the active tab's table
+    const tableMap: Record<TabType, string> = {
+      beer: 'beer_items',
+      wine: 'wine_items',
+      pepsi: 'pepsi_items',
+      glassware: 'glassware_items',
+    }
+
+    const tableName = tableMap[activeTab]
+
+    const { data, error } = await supabase
+      .from(tableName)
+      .select('*')
+      .order('product_name')
+
+    if (error) {
+      toast.error('Failed to load items')
+      return
+    }
+
+    // Map to order items, applying any edited counts
+    const items: OrderItem[] = (data || []).map((item: any) => {
+      const editedCount = editedCounts.get(item.id)
+      const currentCount = editedCount ? editedCount.newCount : item.current_count
+      return {
+        id: item.id,
+        productName: item.product_name,
+        currentCount,
+        parLevel: item.par_level,
+        orderQty: Math.max(0, item.par_level - currentCount),
+        distributor: item.distributor_name,
+      }
+    })
+
+    setOrderItems(items)
+    setOrderDistributor(undefined) // Could be set per distributor for beer/wine
+    setShowOrderModal(true)
   }
 
   const handleSubmit = async () => {
@@ -238,9 +291,9 @@ export default function InventoryPage() {
           )}
         </div>
 
-        {/* Sticky Submit Button */}
+        {/* Sticky Action Bar */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 p-4 shadow-lg">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <div className="text-gray-600">
               {editedCounts.size > 0 ? (
                 <span className="font-medium">
@@ -250,19 +303,39 @@ export default function InventoryPage() {
                 <span>Enter counts above to submit</span>
               )}
             </div>
-            <button
-              onClick={handleSubmit}
-              disabled={editedCounts.size === 0 || isSubmitting}
-              className={`px-8 py-3 rounded-xl font-bold text-lg transition-all ${
-                editedCounts.size === 0 || isSubmitting
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 shadow-lg'
-              }`}
-            >
-              {isSubmitting ? '⏳ Submitting...' : `✅ Submit ${activeTab.toUpperCase()} Counts`}
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleGenerateOrder}
+                className="px-6 py-3 rounded-xl font-bold text-lg transition-all bg-gradient-to-r from-slate-600 to-slate-700 text-white hover:from-slate-700 hover:to-slate-800 shadow-lg"
+              >
+                📦 Generate Order
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={editedCounts.size === 0 || isSubmitting}
+                className={`px-8 py-3 rounded-xl font-bold text-lg transition-all ${
+                  editedCounts.size === 0 || isSubmitting
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 shadow-lg'
+                }`}
+              >
+                {isSubmitting ? '⏳ Submitting...' : `✅ Submit ${activeTab.toUpperCase()} Counts`}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Generate Order Modal */}
+        {showOrderModal && user && (
+          <GenerateOrderModal
+            orderType={activeTab}
+            items={orderItems}
+            distributorName={orderDistributor}
+            userId={user.id}
+            userName={user.full_name || user.email || 'Unknown'}
+            onClose={() => setShowOrderModal(false)}
+          />
+        )}
       </main>
     </div>
   )

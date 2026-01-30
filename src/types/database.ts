@@ -233,3 +233,31 @@ export interface EditedCount {
   productName: string
   parLevel: number
 }
+
+// Order
+export type OrderStatus = 'generated' | 'sent' | 'received' | 'cancelled'
+export type OrderType = 'beer' | 'wine' | 'pepsi' | 'glassware' | 'liquor'
+
+export interface Order {
+  id: string
+  created_at: string
+  created_by: string
+  order_type: OrderType
+  distributor_id: string | null
+  distributor_name: string | null
+  items: OrderItem[]
+  total_items: number
+  status: OrderStatus
+  notes: string | null
+  email_sent_at: string | null
+  email_recipients: string[] | null
+}
+
+export interface OrderItem {
+  id: string
+  productName: string
+  currentCount: number
+  parLevel: number
+  orderQty: number
+  distributor?: string
+}
