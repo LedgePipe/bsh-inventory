@@ -25,7 +25,7 @@ interface LiquorOrderItem {
 
 interface PartialEdit {
   itemId: string
-  partial: number
+  partials: number[]  // Array of partial values
   itemName: string
 }
 
@@ -289,10 +289,10 @@ export default function Home() {
     setShowOrderModal(true)
   }
 
-  function handlePartialChange(itemId: string, partial: number, itemName: string) {
+  function handlePartialChange(itemId: string, partials: number[], itemName: string) {
     setEditedPartials(prev => {
       const newMap = new Map(prev)
-      newMap.set(itemId, { itemId, partial, itemName })
+      newMap.set(itemId, { itemId, partials, itemName })
       return newMap
     })
   }
@@ -310,11 +310,15 @@ export default function Home() {
       const item = items.find(i => i.id === update.itemId)
       if (!item) continue
 
+      // Calculate total from array of partials
+      const totalPartial = update.partials.reduce((sum, p) => sum + p, 0)
+
       const now = new Date().toISOString()
       const { error } = await supabase
         .from('inventory_items')
         .update({
-          partial_count: update.partial,
+          partial_count: totalPartial,
+          partials_breakdown: update.partials,
           updated_at: now,
           updated_by: user?.id
         })
@@ -334,7 +338,7 @@ export default function Home() {
     }
 
     if (successCount > 0) {
-      toast.success(`✅ Updated ${successCount} partial bottle${successCount > 1 ? 's' : ''}`)
+      toast.success(`✅ Updated ${successCount} item${successCount > 1 ? 's' : ''} with partials`)
       setEditedPartials(new Map())
       fetchInventory() // Refresh data
     }
