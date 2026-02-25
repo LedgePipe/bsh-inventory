@@ -6,8 +6,8 @@ import { Toaster } from 'sonner'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'BSH Inventory - I\'m Helping!',
-  description: 'Bradshaw Social House Inventory Management - Ralph Wiggum Edition',
+  title: 'BSH Inventory',
+  description: 'Bradshaw Social House Inventory Management',
   manifest: '/manifest.json',
   themeColor: '#475569',
 }
