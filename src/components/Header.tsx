@@ -40,6 +40,7 @@ export default function Header({ user, profile, onLogout }: HeaderProps) {
   const navLinks = [
     { href: '/', label: 'LIQUOR', emoji: '🍾', description: 'Spirits & Bottles' },
     { href: '/inventory', label: 'BEER/WINE/MORE', emoji: '🍺', description: 'Pepsi & Glassware' },
+    ...(displayRole === 'admin' ? [{ href: '/admin', label: 'ADMIN', emoji: '👑', description: 'Dashboard & Settings' }] : []),
   ]
 
   return (

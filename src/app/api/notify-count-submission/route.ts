@@ -22,17 +22,23 @@ export async function POST(request: NextRequest) {
 
     const supabase = createRouteHandlerClient({ cookies })
 
-    // Fetch all managers' emails
-    const { data: managers, error: managersError } = await supabase
-      .from('profiles')
-      .select('email, full_name')
-      .in('role', ['admin', 'manager'])
+    // Fetch notification recipients from config table, fallback to managers
+    let managerEmails: string[] = []
+    const { data: recipients, error: recipientsError } = await supabase
+      .from('notification_recipients')
+      .select('email')
+      .eq('active', true)
 
-    if (managersError) {
-      console.error('Error fetching managers:', managersError)
+    if (!recipientsError && recipients && recipients.length > 0) {
+      managerEmails = recipients.map(r => r.email)
+    } else {
+      // Fallback: fetch managers/admins
+      const { data: managers } = await supabase
+        .from('profiles')
+        .select('email')
+        .in('role', ['admin', 'manager'])
+      managerEmails = managers?.map(m => m.email) || []
     }
-
-    const managerEmails = managers?.map(m => m.email) || []
 
     // Format the email body
     const timestamp = new Date().toLocaleString('en-US', {
