@@ -1,6 +1,6 @@
-# 🍾 BSH Inventory - "I'm Helping!"
+# BSH Inventory
 
-A Ralph Wiggum-themed inventory management system for Bradshaw Social House.
+Inventory management system for Bradshaw Social House.
 
 ## Features
 
@@ -9,7 +9,6 @@ A Ralph Wiggum-themed inventory management system for Bradshaw Social House.
 - 📤 **CSV bulk upload**: Import inventory from spreadsheets
 - 🔔 **Low stock alerts**: Browser notifications when items need restocking
 - 📱 **Mobile responsive**: Works on phones and tablets
-- 🎨 **Ralph Wiggum style**: Because "Me fail inventory? That's unpossible!"
 
 ## Tech Stack
 
@@ -30,17 +29,17 @@ A Ralph Wiggum-themed inventory management system for Bradshaw Social House.
 
 Create a `.env.local` file:
 
-\`\`\`
+```
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-\`\`\`
+```
 
 ### 3. Install & Run
 
-\`\`\`bash
+```bash
 npm install
 npm run dev
-\`\`\`
+```
 
 Open [http://localhost:3000](http://localhost:3000)
 
@@ -60,12 +59,8 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## CSV Format
 
-\`\`\`
+```
 Code, Name, Category, Par Level, Cost, Unit Type
 TITO-750, Tito's Vodka 750ml, liquor, 6, 19.99, bottle
 BUD-CASE, Budweiser 24pk, beer, 10, 22.99, case
-\`\`\`
-
----
-
-*"The doctor said I wouldn't have so many inventory errors if I kept my finger outta there!"* - Ralph Wiggum
+```
