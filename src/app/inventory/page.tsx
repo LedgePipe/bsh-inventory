@@ -249,7 +249,7 @@ export default function InventoryPage() {
         </div>
 
         {/* Admin Badge */}
-        {userRole === 'admin' && (
+        {userRole !== 'staff' && (
           <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
             👑 ADMIN MODE - You can edit par levels
           </div>

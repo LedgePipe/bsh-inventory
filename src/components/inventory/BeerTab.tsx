@@ -187,7 +187,7 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
             <span className="ml-2 text-xs opacity-70">({dist.reminder_days})</span>
           </button>
         ))}
-        {userRole === 'admin' && (
+        {userRole !== 'staff' && (
           <button
             onClick={() => setShowAddDistributor(true)}
             className="px-4 py-2 rounded-lg font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 transition-all"
@@ -204,7 +204,7 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
             <h2 className="text-xl font-bold text-gray-800">{activeDistributorData.name}</h2>
             <p className="text-sm text-gray-500">Reminder days: {activeDistributorData.reminder_days}</p>
           </div>
-          {userRole === 'admin' && (
+          {userRole !== 'staff' && (
             <div className="flex gap-2">
               <button
                 onClick={() => setShowAddItem(true)}
@@ -229,7 +229,7 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
           <div className="text-6xl mb-4">🍺</div>
           <h3 className="text-xl font-bold text-gray-700 mb-2">No items yet</h3>
           <p className="text-gray-500">
-            {userRole === 'admin'
+            {userRole !== 'staff'
               ? 'Click "Add Item" to add beer products'
               : 'No beer items have been added yet'}
           </p>
@@ -247,7 +247,7 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
                   <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Order Qty</th>
                   <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Status</th>
                   <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase hidden md:table-cell">Last Counted</th>
-                  {userRole === 'admin' && (
+                  {userRole !== 'staff' && (
                     <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Actions</th>
                   )}
                 </tr>
@@ -270,7 +270,7 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        {userRole === 'admin' && editingPar === item.id ? (
+                        {userRole !== 'staff' && editingPar === item.id ? (
                           <input
                             type="number"
                             defaultValue={item.par_level}
@@ -286,8 +286,8 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
                           />
                         ) : (
                           <span
-                            className={`font-medium ${userRole === 'admin' ? 'cursor-pointer hover:text-purple-600' : ''}`}
-                            onClick={() => userRole === 'admin' && setEditingPar(item.id)}
+                            className={`font-medium ${userRole !== 'staff' ? 'cursor-pointer hover:text-purple-600' : ''}`}
+                            onClick={() => userRole !== 'staff' && setEditingPar(item.id)}
                           >
                             {item.par_level}
                           </span>
@@ -323,7 +323,7 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
                         <br />
                         <span className="text-xs">{formatTimeAgo(item.last_counted_at)}</span>
                       </td>
-                      {userRole === 'admin' && (
+                      {userRole !== 'staff' && (
                         <td className="px-4 py-3 text-center">
                           <button
                             onClick={() => handleDeleteItem(item.id)}

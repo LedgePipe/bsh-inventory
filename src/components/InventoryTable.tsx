@@ -6,6 +6,7 @@ interface InventoryTableProps {
   items: InventoryItemWithUpdater[]
   userRole: UserRole
   onEditCount: (item: InventoryItemWithUpdater) => void
+  onEditItem?: (item: InventoryItemWithUpdater) => void
   onDelete: (itemId: string) => void
 }
 
@@ -24,7 +25,7 @@ function formatTimeAgo(dateString: string): string {
   return date.toLocaleDateString()
 }
 
-export default function InventoryTable({ items, userRole, onEditCount, onDelete }: InventoryTableProps) {
+export default function InventoryTable({ items, userRole, onEditCount, onEditItem, onDelete }: InventoryTableProps) {
   const categoryEmoji: Record<string, string> = {
     liquor: '🍾',
     beer: '🍺',
@@ -45,6 +46,8 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
     if (percent < 75) return { class: 'bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-700', text: '⚠️ Watch', percent }
     return { class: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700', text: '✅ Good', percent }
   }
+
+  const canEdit = userRole !== 'staff'
 
   if (items.length === 0) {
     return (
@@ -72,8 +75,8 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
               <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">🔢 Total</th>
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">💭 Status</th>
               <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider hidden lg:table-cell">💰 Cost</th>
-              {userRole === 'admin' && (
-                <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">🗑️</th>
+              {canEdit && (
+                <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">⚙️</th>
               )}
             </tr>
           </thead>
@@ -126,14 +129,26 @@ export default function InventoryTable({ items, userRole, onEditCount, onDelete 
                   <td className="px-4 py-3 text-right hidden lg:table-cell">
                     <span className="text-gray-600">${Number(item.cost_per_unit).toFixed(2)}</span>
                   </td>
-                  {userRole === 'admin' && (
+                  {canEdit && (
                     <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => onDelete(item.id)}
-                        className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors"
-                      >
-                        🗑️
-                      </button>
+                      <div className="flex items-center justify-center gap-1">
+                        {onEditItem && (
+                          <button
+                            onClick={() => onEditItem(item)}
+                            className="px-2 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-sm font-medium transition-colors"
+                            title="Edit item details"
+                          >
+                            ✏️
+                          </button>
+                        )}
+                        <button
+                          onClick={() => onDelete(item.id)}
+                          className="px-2 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors"
+                          title="Delete item"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </td>
                   )}
                 </tr>

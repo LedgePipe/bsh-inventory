@@ -14,6 +14,7 @@ import EditCountModal from '@/components/EditCountModal'
 import UploadCSVModal from '@/components/UploadCSVModal'
 import GenerateOrderModal from '@/components/inventory/GenerateOrderModal'
 import LiquorPartialsTab from '@/components/LiquorPartialsTab'
+import EditItemModal from '@/components/EditItemModal'
 
 interface LiquorOrderItem {
   id: string
@@ -46,6 +47,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<LiquorTabType>('full')
   const [editedPartials, setEditedPartials] = useState<Map<string, PartialEdit>>(new Map())
   const [showLowStockOnly, setShowLowStockOnly] = useState(false)
+  const [editingItem, setEditingItem] = useState<InventoryItemWithUpdater | null>(null)
 
   useEffect(() => {
     checkUser()
@@ -145,6 +147,31 @@ export default function Home() {
       toast.error('Failed to delete item')
     } else {
       toast.success('🗑️ Item deleted')
+      await loadItems()
+    }
+  }
+
+  async function handleEditItem(values: Record<string, string | number>) {
+    if (!editingItem) return
+    const { error } = await supabase
+      .from('inventory_items')
+      .update({
+        name: values.name as string,
+        code: values.code as string,
+        category: values.category as string,
+        par_level: Number(values.par_level),
+        cost_per_unit: Number(values.cost_per_unit),
+        unit_type: values.unit_type as string,
+        updated_at: new Date().toISOString(),
+        updated_by: user?.id,
+      })
+      .eq('id', editingItem.id)
+
+    if (error) {
+      toast.error('Failed to update item: ' + error.message)
+    } else {
+      toast.success(`✅ ${values.name} updated!`)
+      setEditingItem(null)
       await loadItems()
     }
   }
@@ -380,6 +407,7 @@ export default function Home() {
             items={filteredItems}
             userRole={profile?.role || 'staff'}
             onEditCount={handleEditCount}
+            onEditItem={(item) => setEditingItem(item)}
             onDelete={handleDeleteItem}
           />
         ) : (
@@ -464,6 +492,36 @@ export default function Home() {
           userId={profile.id}
           userName={profile.full_name || profile.email}
           onClose={() => setShowOrderModal(false)}
+        />
+      )}
+
+      {editingItem && (
+        <EditItemModal
+          title={`Edit ${editingItem.name}`}
+          fields={[
+            { key: 'name', label: 'Product Name', type: 'text' },
+            { key: 'code', label: 'Code', type: 'text' },
+            { key: 'category', label: 'Category', type: 'select', options: [
+              { value: 'liquor', label: '🍾 Liquor' },
+              { value: 'beer', label: '🍺 Beer' },
+              { value: 'wine', label: '🍷 Wine' },
+              { value: 'food', label: '🍔 Food' },
+              { value: 'supplies', label: '📦 Supplies' },
+            ]},
+            { key: 'par_level', label: 'Par Level', type: 'number', step: '1' },
+            { key: 'cost_per_unit', label: 'Cost Per Unit ($)', type: 'number', step: '0.01' },
+            { key: 'unit_type', label: 'Unit Type', type: 'text' },
+          ]}
+          values={{
+            name: editingItem.name,
+            code: editingItem.code,
+            category: editingItem.category,
+            par_level: editingItem.par_level,
+            cost_per_unit: editingItem.cost_per_unit,
+            unit_type: editingItem.unit_type,
+          }}
+          onSave={handleEditItem}
+          onClose={() => setEditingItem(null)}
         />
       )}
     </div>

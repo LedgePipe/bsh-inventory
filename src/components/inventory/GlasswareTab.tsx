@@ -133,7 +133,7 @@ export default function GlasswareTab({ userRole, userId, onCountChange, editedCo
           <h2 className="text-xl font-bold text-gray-800">🥃 Glassware Inventory</h2>
           <p className="text-sm text-gray-500">Track your glass inventory</p>
         </div>
-        {userRole === 'admin' && (
+        {userRole !== 'staff' && (
           <button
             onClick={() => setShowAddItem(true)}
             className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium hover:bg-green-200 transition"
@@ -186,7 +186,7 @@ export default function GlasswareTab({ userRole, userId, onCountChange, editedCo
                 <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Order Qty</th>
                 <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Status</th>
                 <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase hidden md:table-cell">Last Counted</th>
-                {userRole === 'admin' && (
+                {userRole !== 'staff' && (
                   <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Actions</th>
                 )}
               </tr>
@@ -204,7 +204,7 @@ export default function GlasswareTab({ userRole, userId, onCountChange, editedCo
                       <span className="font-medium text-gray-800">{item.product_name}</span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      {userRole === 'admin' && editingPar === item.id ? (
+                      {userRole !== 'staff' && editingPar === item.id ? (
                         <input
                           type="number"
                           defaultValue={item.par_level}
@@ -218,8 +218,8 @@ export default function GlasswareTab({ userRole, userId, onCountChange, editedCo
                         />
                       ) : (
                         <span
-                          className={`font-medium ${userRole === 'admin' ? 'cursor-pointer hover:text-gray-600' : ''}`}
-                          onClick={() => userRole === 'admin' && setEditingPar(item.id)}
+                          className={`font-medium ${userRole !== 'staff' ? 'cursor-pointer hover:text-gray-600' : ''}`}
+                          onClick={() => userRole !== 'staff' && setEditingPar(item.id)}
                         >
                           {item.par_level}
                         </span>
@@ -255,7 +255,7 @@ export default function GlasswareTab({ userRole, userId, onCountChange, editedCo
                       <br />
                       <span className="text-xs">{formatTimeAgo(item.last_counted_at)}</span>
                     </td>
-                    {userRole === 'admin' && (
+                    {userRole !== 'staff' && (
                       <td className="px-4 py-3 text-center">
                         <button
                           onClick={() => handleDeleteItem(item.id)}

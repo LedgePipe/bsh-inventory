@@ -133,7 +133,7 @@ export default function WineTab({ userRole, userId, onCountChange, editedCounts 
             <span className="ml-2 text-xs opacity-70">({dist.reminder_days})</span>
           </button>
         ))}
-        {userRole === 'admin' && (
+        {userRole !== 'staff' && (
           <button
             onClick={() => setShowAddDistributor(true)}
             className="px-4 py-2 rounded-lg font-medium bg-purple-100 text-purple-700 hover:bg-purple-200 transition-all"
@@ -150,7 +150,7 @@ export default function WineTab({ userRole, userId, onCountChange, editedCounts 
             <h2 className="text-xl font-bold text-gray-800">{activeDistributorData.name}</h2>
             <p className="text-sm text-gray-500">Reminder days: {activeDistributorData.reminder_days}</p>
           </div>
-          {userRole === 'admin' && (
+          {userRole !== 'staff' && (
             <div className="flex gap-2">
               <button onClick={() => setShowAddItem(true)} className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium hover:bg-green-200">
                 ➕ Add Item
@@ -168,7 +168,7 @@ export default function WineTab({ userRole, userId, onCountChange, editedCounts 
         <div className="bg-white rounded-xl shadow-lg p-12 text-center">
           <div className="text-6xl mb-4">🍷</div>
           <h3 className="text-xl font-bold text-gray-700 mb-2">No items yet</h3>
-          <p className="text-gray-500">{userRole === 'admin' ? 'Click "Add Item" to add wine products' : 'No wine items have been added yet'}</p>
+          <p className="text-gray-500">{userRole !== 'staff' ? 'Click "Add Item" to add wine products' : 'No wine items have been added yet'}</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -183,7 +183,7 @@ export default function WineTab({ userRole, userId, onCountChange, editedCounts 
                   <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Order Qty</th>
                   <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Status</th>
                   <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase hidden md:table-cell">Last Counted</th>
-                  {userRole === 'admin' && <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Actions</th>}
+                  {userRole !== 'staff' && <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -198,13 +198,13 @@ export default function WineTab({ userRole, userId, onCountChange, editedCounts 
                       <td className="px-4 py-3"><span className="font-medium text-gray-800">{item.product_name}</span></td>
                       <td className="px-4 py-3 text-center"><span className="inline-flex px-2 py-1 bg-gray-100 rounded-lg text-sm">{item.bottle_size}</span></td>
                       <td className="px-4 py-3 text-center">
-                        {userRole === 'admin' && editingPar === item.id ? (
+                        {userRole !== 'staff' && editingPar === item.id ? (
                           <input type="number" defaultValue={item.par_level} className="w-16 px-2 py-1 border rounded text-center" autoFocus
                             onBlur={(e) => handleParChange(item.id, parseInt(e.target.value) || 0)}
                             onKeyDown={(e) => { if (e.key === 'Enter') handleParChange(item.id, parseInt((e.target as HTMLInputElement).value) || 0); if (e.key === 'Escape') setEditingPar(null) }}
                           />
                         ) : (
-                          <span className={`font-medium ${userRole === 'admin' ? 'cursor-pointer hover:text-purple-600' : ''}`} onClick={() => userRole === 'admin' && setEditingPar(item.id)}>{item.par_level}</span>
+                          <span className={`font-medium ${userRole !== 'staff' ? 'cursor-pointer hover:text-purple-600' : ''}`} onClick={() => userRole !== 'staff' && setEditingPar(item.id)}>{item.par_level}</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">
@@ -219,7 +219,7 @@ export default function WineTab({ userRole, userId, onCountChange, editedCounts 
                         {item.counter && <span>{item.counter.full_name || item.counter.email?.split('@')[0]}</span>}<br />
                         <span className="text-xs">{formatTimeAgo(item.last_counted_at)}</span>
                       </td>
-                      {userRole === 'admin' && (
+                      {userRole !== 'staff' && (
                         <td className="px-4 py-3 text-center">
                           <button onClick={() => handleDeleteItem(item.id)} className="px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">🗑️</button>
                         </td>
