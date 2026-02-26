@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: process.env.RESEND_FROM_EMAIL || 'BSH Inventory <orders@resend.dev>',
+        from: process.env.RESEND_FROM_EMAIL || 'BSH Inventory <onboarding@resend.dev>',
         to: recipients,
         subject: `📦 BSH Order: ${orderType.toUpperCase()}${distributorName ? ` - ${distributorName}` : ''} (${items.length} items)`,
         html: emailHtml,
