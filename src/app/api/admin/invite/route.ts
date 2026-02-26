@@ -33,34 +33,11 @@ export async function POST(request: NextRequest) {
     full_name: null,
   })
 
-  // Generate magic link for invite
-  const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-    type: 'magiclink',
-    email,
-  })
-
-  // Send invite email via Resend
-  const resendApiKey = process.env.RESEND_API_KEY
-  if (resendApiKey) {
-    const inviteLink = linkData?.properties?.action_link || ''
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'BSH Inventory <onboarding@resend.dev>',
-        to: [email],
-        subject: 'You\'re invited to BSH Inventory',
-        html: `
-          <h2>Welcome to BSH Inventory!</h2>
-          <p>You've been invited to join the Bradshaw Social House inventory system as <strong>${role}</strong>.</p>
-          ${inviteLink ? `<p><a href="${inviteLink}" style="background:#f59e0b;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Accept Invitation</a></p>` : '<p>Please log in at the BSH Inventory app to get started.</p>'}
-          <p>— BSH Inventory Team</p>
-        `,
-      }),
-    })
+  // Send invite via Supabase built-in email (works without domain verification)
+  const { error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email)
+  if (inviteError) {
+    console.error('Invite email error:', inviteError)
+    // Non-fatal — user is already created, they can use password reset to get in
   }
 
   return NextResponse.json({ success: true, userId: newUser.user.id })

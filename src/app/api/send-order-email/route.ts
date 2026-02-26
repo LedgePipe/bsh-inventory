@@ -32,11 +32,9 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to fetch user emails')
     }
 
-    const recipients = profiles?.map(p => p.email).filter(Boolean) || []
-
-    if (recipients.length === 0) {
-      return NextResponse.json({ error: 'No recipients found' }, { status: 400 })
-    }
+    // Always include owner email, plus any other profile emails
+    const profileEmails = profiles?.map(p => p.email).filter(Boolean) || []
+    const recipients = Array.from(new Set(['jamie@ledgepipe.com', ...profileEmails]))
 
     // Check if Resend API key is configured
     const resendApiKey = process.env.RESEND_API_KEY
