@@ -25,7 +25,7 @@ export async function GET() {
   ])
 
   // Get profile names for submissions
-  const userIds = [...new Set((submissions.data || []).map(s => s.submitted_by))]
+  const userIds = Array.from(new Set((submissions.data || []).map((s: any) => s.submitted_by)))
   const { data: profiles } = userIds.length > 0
     ? await supabaseAdmin.from('profiles').select('id, email, full_name').in('id', userIds)
     : { data: [] }
