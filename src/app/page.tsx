@@ -48,6 +48,9 @@ export default function Home() {
   const [editedPartials, setEditedPartials] = useState<Map<string, PartialEdit>>(new Map())
   const [showLowStockOnly, setShowLowStockOnly] = useState(false)
   const [editingItem, setEditingItem] = useState<InventoryItemWithUpdater | null>(null)
+  const [snapshotLoading, setSnapshotLoading] = useState(false)
+  const [bulkMode, setBulkMode] = useState(false)
+  const [bulkCounts, setBulkCounts] = useState<Map<string, number>>(new Map())
 
   useEffect(() => {
     checkUser()
@@ -280,6 +283,93 @@ export default function Home() {
     setShowLowStockOnly(!showLowStockOnly)
   }
 
+  async function handleTakeSnapshot() {
+    setSnapshotLoading(true)
+    try {
+      const res = await fetch('/api/create-snapshot', { method: 'POST' })
+      if (!res.ok) throw new Error('Snapshot failed')
+      toast.success('📸 Snapshot saved!')
+    } catch (err) {
+      toast.error('Failed to create snapshot')
+    } finally {
+      setSnapshotLoading(false)
+    }
+  }
+
+  function handleBulkCountChange(itemId: string, value: string) {
+    const num = parseFloat(value)
+    setBulkCounts(prev => {
+      const updated = new Map(prev)
+      if (value === '' || isNaN(num)) {
+        updated.delete(itemId)
+      } else {
+        updated.set(itemId, num)
+      }
+      return updated
+    })
+  }
+
+  function handleBulkKeyDown(e: React.KeyboardEvent<HTMLInputElement>, index: number) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      const nextInput = document.querySelector(`[data-bulk-index="${index + 1}"]`) as HTMLInputElement
+      if (nextInput) nextInput.focus()
+    }
+  }
+
+  async function handleSubmitBulkCounts() {
+    if (bulkCounts.size === 0) {
+      toast.error('No counts entered')
+      return
+    }
+
+    let success = 0
+    let errors = 0
+
+    for (const [itemId, newCount] of bulkCounts) {
+      const item = items.find(i => i.id === itemId)
+      if (!item || item.current_count === newCount) continue
+
+      const { error } = await supabase
+        .from('inventory_items')
+        .update({
+          current_count: newCount,
+          updated_at: new Date().toISOString(),
+          updated_by: user?.id
+        })
+        .eq('id', itemId)
+
+      if (error) {
+        errors++
+        continue
+      }
+
+      await supabase
+        .from('inventory_logs')
+        .insert({
+          item_id: itemId,
+          user_id: user?.id,
+          previous_count: item.current_count,
+          new_count: newCount,
+          action: 'count_update',
+          notes: 'Bulk count update'
+        })
+
+      success++
+    }
+
+    if (errors > 0) {
+      toast.error(`${errors} item(s) failed to update`)
+    }
+    if (success > 0) {
+      toast.success(`✅ ${success} item(s) updated!`)
+    }
+
+    setBulkMode(false)
+    setBulkCounts(new Map())
+    await loadItems()
+  }
+
   // Filter items
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -351,6 +441,21 @@ export default function Home() {
           >
             ⚠️ Check Low Stock
           </button>
+          <button
+            onClick={() => { setBulkMode(true); setBulkCounts(new Map()) }}
+            className="px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-xl font-bold shadow hover:from-violet-600 hover:to-purple-600 transition-all"
+          >
+            ⚡ Bulk Count
+          </button>
+          {profile?.role !== 'staff' && (
+            <button
+              onClick={handleTakeSnapshot}
+              disabled={snapshotLoading}
+              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold shadow hover:from-amber-600 hover:to-orange-600 transition-all disabled:opacity-50"
+            >
+              {snapshotLoading ? '⏳ Saving...' : '📸 Take Snapshot'}
+            </button>
+          )}
           <div className="flex-1" />
           <input
             type="text"
@@ -400,6 +505,54 @@ export default function Home() {
             ½ Partials
           </button>
         </div>
+
+        {/* Bulk Count Mode */}
+        {bulkMode && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+              <div className="p-6 border-b border-gray-200">
+                <h2 className="text-2xl font-bold text-gray-800">⚡ Bulk Count Mode</h2>
+                <p className="text-gray-500 mt-1">
+                  {bulkCounts.size} of {filteredItems.length} items counted
+                </p>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                {filteredItems.map((item, index) => (
+                  <div key={item.id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-800 truncate">{item.name}</p>
+                      <p className="text-sm text-gray-500">Current: {item.current_count}</p>
+                    </div>
+                    <input
+                      type="number"
+                      data-bulk-index={index}
+                      placeholder="New"
+                      value={bulkCounts.has(item.id) ? bulkCounts.get(item.id) : ''}
+                      onChange={(e) => handleBulkCountChange(item.id, e.target.value)}
+                      onKeyDown={(e) => handleBulkKeyDown(e, index)}
+                      className="w-24 px-3 py-2 rounded-xl border border-gray-300 text-center font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                      autoFocus={index === 0}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="p-4 border-t border-gray-200 flex gap-3 justify-end">
+                <button
+                  onClick={() => { setBulkMode(false); setBulkCounts(new Map()) }}
+                  className="px-6 py-3 rounded-xl font-bold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitBulkCounts}
+                  className="px-8 py-3 rounded-xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 shadow-lg transition-all"
+                >
+                  ✅ Submit All ({bulkCounts.size})
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Content */}
         {activeTab === 'full' ? (
