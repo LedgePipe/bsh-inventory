@@ -20,8 +20,7 @@ export async function POST(request: NextRequest) {
     const body: NotifyRequest = await request.json()
     const { submittedBy, submissionType, itemsData } = body
 
-    const cookieStore = await cookies()
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+    const supabase = createRouteHandlerClient({ cookies })
 
     // Fetch notification recipients from config table, fallback to managers
     let managerEmails: string[] = []
