@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'BSH Inventory <harold.ai.caskey@gmail.com>',
+        from: 'BSH Inventory <onboarding@resend.dev>',
         to: [email],
         subject: 'You\'re invited to BSH Inventory',
         html: `
