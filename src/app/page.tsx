@@ -326,7 +326,7 @@ export default function Home() {
     let success = 0
     let errors = 0
 
-    for (const [itemId, newCount] of bulkCounts) {
+    for (const [itemId, newCount] of Array.from(bulkCounts.entries())) {
       const item = items.find(i => i.id === itemId)
       if (!item || item.current_count === newCount) continue
 
