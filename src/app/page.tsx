@@ -309,7 +309,7 @@ export default function Home() {
   }
 
   function handleBulkCountChange(itemId: string, value: string) {
-    const num = parseInt(value)
+    const num = parseFloat(value)
     setBulkCounts(prev => {
       const updated = new Map(prev)
       if (value === '' || isNaN(num)) {
@@ -348,10 +348,15 @@ export default function Home() {
       if (!item) { skipped++; continue }
       // Save even if count matches — it confirms the count was verified
       
+      // Split into full bottles and partial
+      const fullBottles = Math.floor(newCount)
+      const partialAmount = Math.round((newCount - fullBottles) * 10) / 10
+
       const { error } = await supabase
         .from('inventory_items')
         .update({
-          current_count: newCount,
+          current_count: fullBottles,
+          partial_count: partialAmount,
           updated_at: new Date().toISOString(),
           updated_by: user?.id
         })
@@ -369,9 +374,9 @@ export default function Home() {
           item_id: itemId,
           user_id: user?.id,
           previous_count: item.current_count,
-          new_count: newCount,
+          new_count: fullBottles,
           action: 'count_update',
-          notes: 'Bulk count update'
+          notes: `Bulk count: ${newCount} (${fullBottles} full + ${partialAmount} partial)`
         })
 
       success++
@@ -577,7 +582,7 @@ export default function Home() {
                     </div>
                     <input
                       type="number"
-                      step="1"
+                      step="0.1"
                       min="0"
                       data-bulk-index={index}
                       placeholder="New"
