@@ -51,6 +51,7 @@ export default function Home() {
   const [snapshotLoading, setSnapshotLoading] = useState(false)
   const [bulkMode, setBulkMode] = useState(false)
   const [bulkCounts, setBulkCounts] = useState<Map<string, number>>(new Map())
+  const [bulkSubmitting, setBulkSubmitting] = useState(false)
 
   useEffect(() => {
     checkUser()
@@ -319,17 +320,23 @@ export default function Home() {
 
   async function handleSubmitBulkCounts() {
     if (bulkCounts.size === 0) {
-      toast.error('No counts entered')
+      toast.error('No counts entered — enter at least one count first')
       return
     }
 
+    const confirmed = window.confirm(`Save ${bulkCounts.size} count(s)? This will update inventory.`)
+    if (!confirmed) return
+
+    setBulkSubmitting(true)
     let success = 0
+    let skipped = 0
     let errors = 0
 
     for (const [itemId, newCount] of Array.from(bulkCounts.entries())) {
       const item = items.find(i => i.id === itemId)
-      if (!item || item.current_count === newCount) continue
-
+      if (!item) { skipped++; continue }
+      // Save even if count matches — it confirms the count was verified
+      
       const { error } = await supabase
         .from('inventory_items')
         .update({
@@ -340,6 +347,7 @@ export default function Home() {
         .eq('id', itemId)
 
       if (error) {
+        console.error(`Failed to update ${item.name}:`, error)
         errors++
         continue
       }
@@ -358,11 +366,44 @@ export default function Home() {
       success++
     }
 
+    // Create a count_submission record
+    if (success > 0) {
+      await supabase
+        .from('count_submissions')
+        .insert({
+          user_id: user?.id,
+          category: 'liquor',
+          item_count: success,
+          notes: `Bulk count: ${success} items updated`
+        })
+
+      // Send email notification
+      try {
+        await fetch('/api/notify-count-submission', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'count_submission',
+            category: 'liquor',
+            itemCount: success,
+            userName: profile?.full_name || user?.email,
+          })
+        })
+      } catch (e) {
+        console.error('Notification failed:', e)
+      }
+    }
+
+    setBulkSubmitting(false)
+
     if (errors > 0) {
-      toast.error(`${errors} item(s) failed to update`)
+      toast.error(`${errors} item(s) failed to save`)
     }
     if (success > 0) {
-      toast.success(`✅ ${success} item(s) updated!`)
+      toast.success(`✅ ${success} item(s) saved! ${skipped > 0 ? `(${skipped} skipped)` : ''}`)
+    }
+    if (success === 0 && errors === 0) {
+      toast.error('Nothing saved — try entering counts again')
     }
 
     setBulkMode(false)
@@ -545,9 +586,10 @@ export default function Home() {
                 </button>
                 <button
                   onClick={handleSubmitBulkCounts}
-                  className="px-8 py-3 rounded-xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 shadow-lg transition-all"
+                  disabled={bulkSubmitting || bulkCounts.size === 0}
+                  className="px-8 py-3 rounded-xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  ✅ Submit All ({bulkCounts.size})
+                  {bulkSubmitting ? '⏳ Saving...' : `✅ Submit All (${bulkCounts.size})`}
                 </button>
               </div>
             </div>
