@@ -102,15 +102,17 @@ export default function InventoryPage() {
     }
 
     // Map to order items, applying any edited counts
+    // Only order if deficit >= 0.5, always whole units
     const items: OrderItem[] = (data || []).map((item: any) => {
       const editedCount = editedCounts.get(item.id)
       const currentCount = editedCount ? editedCount.newCount : item.current_count
+      const deficit = item.par_level - currentCount
       return {
         id: item.id,
         productName: item.product_name,
         currentCount,
         parLevel: item.par_level,
-        orderQty: Math.max(0, item.par_level - currentCount),
+        orderQty: deficit >= 0.5 ? Math.ceil(deficit) : 0,
         distributor: item.distributor_name,
       }
     })

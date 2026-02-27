@@ -256,7 +256,8 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
                 {filteredItems.map((item) => {
                   const editedCount = editedCounts.get(item.id)
                   const currentCount = editedCount ? editedCount.newCount : item.current_count
-                  const orderQty = Math.max(0, item.par_level - currentCount)
+                  const deficit = item.par_level - currentCount
+                  const orderQty = deficit >= 0.5 ? Math.ceil(deficit) : 0
                   const status = getStatus(currentCount, item.par_level)
 
                   return (

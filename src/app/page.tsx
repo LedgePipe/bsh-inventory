@@ -263,14 +263,25 @@ export default function Home() {
 
   function handleGenerateOrder() {
     const orderItems: LiquorOrderItem[] = items
-      .filter(item => item.par_level > 0 && (item.current_count + (item.partial_count || 0)) < item.par_level)
-      .map(item => ({
-        id: item.id,
-        productName: item.name,
-        currentCount: item.current_count + (item.partial_count || 0),
-        parLevel: item.par_level,
-        orderQty: Math.max(0, item.par_level - (item.current_count + (item.partial_count || 0)))
-      }))
+      .filter(item => {
+        if (item.par_level <= 0) return false
+        const total = item.current_count + (item.partial_count || 0)
+        const deficit = item.par_level - total
+        // Only order if deficit is at least 0.5 (don't order partial bottles)
+        return deficit >= 0.5
+      })
+      .map(item => {
+        const total = item.current_count + (item.partial_count || 0)
+        const deficit = item.par_level - total
+        return {
+          id: item.id,
+          productName: item.name,
+          currentCount: total,
+          parLevel: item.par_level,
+          // Always order whole bottles, round up
+          orderQty: Math.ceil(deficit)
+        }
+      })
 
     if (orderItems.length === 0) {
       toast('All items are at or above par level! 🎉')
@@ -298,7 +309,7 @@ export default function Home() {
   }
 
   function handleBulkCountChange(itemId: string, value: string) {
-    const num = parseFloat(value)
+    const num = parseInt(value)
     setBulkCounts(prev => {
       const updated = new Map(prev)
       if (value === '' || isNaN(num)) {
@@ -566,6 +577,8 @@ export default function Home() {
                     </div>
                     <input
                       type="number"
+                      step="1"
+                      min="0"
                       data-bulk-index={index}
                       placeholder="New"
                       value={bulkCounts.has(item.id) ? bulkCounts.get(item.id) : ''}
