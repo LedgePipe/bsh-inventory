@@ -35,7 +35,15 @@ export default function GenerateOrderModal({
   const [isSending, setIsSending] = useState(false)
   const [orderSent, setOrderSent] = useState(false)
 
-  const orderItems = items.filter(item => item.orderQty > 0)
+  // Only show items that need at least 0.5 deficit, always whole bottle orders
+  const orderItems = items
+    .map(item => ({
+      ...item,
+      orderQty: (item.parLevel - item.currentCount) >= 0.5 
+        ? Math.ceil(item.parLevel - item.currentCount) 
+        : 0
+    }))
+    .filter(item => item.orderQty > 0)
   const totalItems = orderItems.reduce((sum, item) => sum + item.orderQty, 0)
 
   const generatePDF = () => {
