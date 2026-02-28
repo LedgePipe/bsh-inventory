@@ -48,7 +48,7 @@ export default function Home() {
   const [editedPartials, setEditedPartials] = useState<Map<string, PartialEdit>>(new Map())
   const [showLowStockOnly, setShowLowStockOnly] = useState(false)
   const [editingItem, setEditingItem] = useState<InventoryItemWithUpdater | null>(null)
-  const [snapshotLoading, setSnapshotLoading] = useState(false)
+
   const [bulkMode, setBulkMode] = useState(false)
   const [bulkCounts, setBulkCounts] = useState<Map<string, number>>(new Map())
   const [bulkSubmitting, setBulkSubmitting] = useState(false)
@@ -295,18 +295,7 @@ export default function Home() {
     setShowLowStockOnly(!showLowStockOnly)
   }
 
-  async function handleTakeSnapshot() {
-    setSnapshotLoading(true)
-    try {
-      const res = await fetch('/api/create-snapshot', { method: 'POST' })
-      if (!res.ok) throw new Error('Snapshot failed')
-      toast.success('📸 Snapshot saved!')
-    } catch (err) {
-      toast.error('Failed to create snapshot')
-    } finally {
-      setSnapshotLoading(false)
-    }
-  }
+
 
   function handleBulkCountChange(itemId: string, value: string) {
     const num = parseFloat(value)
@@ -504,15 +493,7 @@ export default function Home() {
           >
             ⚡ Bulk Count
           </button>
-          {profile?.role !== 'staff' && (
-            <button
-              onClick={handleTakeSnapshot}
-              disabled={snapshotLoading}
-              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold shadow hover:from-amber-600 hover:to-orange-600 transition-all disabled:opacity-50"
-            >
-              {snapshotLoading ? '⏳ Saving...' : '📸 Take Snapshot'}
-            </button>
-          )}
+
           <div className="flex-1" />
           <input
             type="text"
