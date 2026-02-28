@@ -276,7 +276,7 @@ export default function Home() {
         return {
           id: item.id,
           productName: item.name,
-          currentCount: total,
+          currentCount: Math.round(total * 10) / 10,
           parLevel: item.par_level,
           // Always order whole bottles, round up
           orderQty: Math.ceil(deficit)
