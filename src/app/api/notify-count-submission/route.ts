@@ -76,7 +76,7 @@ BSH Inventory System
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'BSH Inventory <inventory@bshsocialhouse.com>',
+          from: 'BSH Inventory <onboarding@resend.dev>',
           to: managerEmails,
           subject: `[BSH] ${submittedBy} submitted ${submissionType.toUpperCase()} counts`,
           text: emailBody,
