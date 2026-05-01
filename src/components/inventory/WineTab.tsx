@@ -198,13 +198,13 @@ export default function WineTab({ userRole, userId, onCountChange, editedCounts 
                       <td className="px-4 py-3"><span className="font-medium text-gray-800">{item.product_name}</span></td>
                       <td className="px-4 py-3 text-center"><span className="inline-flex px-2 py-1 bg-gray-100 rounded-lg text-sm">{item.bottle_size}</span></td>
                       <td className="px-4 py-3 text-center">
-                        {userRole !== 'staff' && editingPar === item.id ? (
+                        {editingPar === item.id ? (
                           <input type="number" defaultValue={item.par_level} className="w-16 px-2 py-1 border rounded text-center" autoFocus
                             onBlur={(e) => handleParChange(item.id, parseInt(e.target.value) || 0)}
                             onKeyDown={(e) => { if (e.key === 'Enter') handleParChange(item.id, parseInt((e.target as HTMLInputElement).value) || 0); if (e.key === 'Escape') setEditingPar(null) }}
                           />
                         ) : (
-                          <span className={`font-medium ${userRole !== 'staff' ? 'cursor-pointer hover:text-purple-600' : ''}`} onClick={() => userRole !== 'staff' && setEditingPar(item.id)}>{item.par_level}</span>
+                          <span className="font-medium cursor-pointer hover:text-purple-600 underline decoration-dotted underline-offset-4" onClick={() => setEditingPar(item.id)}>{item.par_level}</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">

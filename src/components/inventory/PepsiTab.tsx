@@ -121,7 +121,7 @@ export default function PepsiTab({ userRole, userId, onCountChange, editedCounts
                       <span className="font-medium text-gray-800">{item.product_name}</span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      {userRole !== 'staff' && editingPar === item.id ? (
+                      {editingPar === item.id ? (
                         <input
                           type="number"
                           defaultValue={item.par_level}
@@ -135,8 +135,8 @@ export default function PepsiTab({ userRole, userId, onCountChange, editedCounts
                         />
                       ) : (
                         <span
-                          className={`font-medium ${userRole !== 'staff' ? 'cursor-pointer hover:text-blue-600' : ''}`}
-                          onClick={() => userRole !== 'staff' && setEditingPar(item.id)}
+                          className="font-medium cursor-pointer hover:text-blue-600 underline decoration-dotted underline-offset-4"
+                          onClick={() => setEditingPar(item.id)}
                         >
                           {item.par_level}
                         </span>
