@@ -30,6 +30,11 @@ interface PartialEdit {
   itemName: string
 }
 
+interface BulkPartialCounts {
+  partial1?: number
+  partial2?: number
+}
+
 type LiquorTabType = 'full' | 'partials'
 
 export default function Home() {
@@ -51,6 +56,7 @@ export default function Home() {
 
   const [bulkMode, setBulkMode] = useState(false)
   const [bulkCounts, setBulkCounts] = useState<Map<string, number>>(new Map())
+  const [bulkPartials, setBulkPartials] = useState<Map<string, BulkPartialCounts>>(new Map())
   const [bulkSubmitting, setBulkSubmitting] = useState(false)
 
   useEffect(() => {
@@ -297,6 +303,14 @@ export default function Home() {
 
 
 
+  function getBulkEditedItemIds() {
+    return new Set([...Array.from(bulkCounts.keys()), ...Array.from(bulkPartials.keys())])
+  }
+
+  function getBulkEditedCount() {
+    return getBulkEditedItemIds().size
+  }
+
   function handleBulkCountChange(itemId: string, value: string) {
     const num = parseFloat(value)
     setBulkCounts(prev => {
@@ -310,6 +324,28 @@ export default function Home() {
     })
   }
 
+  function handleBulkPartialChange(itemId: string, field: keyof BulkPartialCounts, value: string) {
+    const num = parseFloat(value)
+    setBulkPartials(prev => {
+      const updated = new Map(prev)
+      const current = { ...(updated.get(itemId) || {}) }
+
+      if (value === '' || isNaN(num)) {
+        delete current[field]
+      } else {
+        current[field] = num
+      }
+
+      if (current.partial1 === undefined && current.partial2 === undefined) {
+        updated.delete(itemId)
+      } else {
+        updated.set(itemId, current)
+      }
+
+      return updated
+    })
+  }
+
   function handleBulkKeyDown(e: React.KeyboardEvent<HTMLInputElement>, index: number) {
     if (e.key === 'Enter') {
       e.preventDefault()
@@ -319,12 +355,15 @@ export default function Home() {
   }
 
   async function handleSubmitBulkCounts() {
-    if (bulkCounts.size === 0) {
+    const editedItemIds = getBulkEditedItemIds()
+    const editedCount = editedItemIds.size
+
+    if (editedCount === 0) {
       toast.error('No counts entered — enter at least one count first')
       return
     }
 
-    const confirmed = window.confirm(`Save ${bulkCounts.size} count(s)? This will update inventory.`)
+    const confirmed = window.confirm(`Save ${editedCount} count(s)? This will update inventory.`)
     if (!confirmed) return
 
     setBulkSubmitting(true)
@@ -332,14 +371,19 @@ export default function Home() {
     let skipped = 0
     let errors = 0
 
-    for (const [itemId, newCount] of Array.from(bulkCounts.entries())) {
+    for (const itemId of Array.from(editedItemIds)) {
       const item = items.find(i => i.id === itemId)
       if (!item) { skipped++; continue }
       // Save even if count matches — it confirms the count was verified
-      
-      // Split into full bottles and partial
-      const fullBottles = Math.floor(newCount)
-      const partialAmount = Math.round((newCount - fullBottles) * 10) / 10
+
+      const enteredFull = bulkCounts.has(itemId) ? (bulkCounts.get(itemId) || 0) : item.current_count
+      const fullBottles = Math.floor(enteredFull)
+      const decimalFromFullInput = Math.round((enteredFull - fullBottles) * 10) / 10
+      const itemPartials = bulkPartials.get(itemId)
+      const partial1 = itemPartials?.partial1 || 0
+      const partial2 = itemPartials?.partial2 || 0
+      const partialAmount = Math.round((decimalFromFullInput + partial1 + partial2) * 10) / 10
+      const totalCount = Math.round((fullBottles + partialAmount) * 10) / 10
 
       const { error } = await supabase
         .from('inventory_items')
@@ -362,10 +406,10 @@ export default function Home() {
         .insert({
           item_id: itemId,
           user_id: user?.id,
-          previous_count: item.current_count,
-          new_count: fullBottles,
+          previous_count: item.current_count + (item.partial_count || 0),
+          new_count: totalCount,
           action: 'count_update',
-          notes: `Bulk count: ${newCount} (${fullBottles} full + ${partialAmount} partial)`
+          notes: `Bulk count: ${totalCount} (${fullBottles} full + ${partial1 || 0} partial 1 + ${partial2 || 0} partial 2)`
         })
 
       success++
@@ -413,6 +457,7 @@ export default function Home() {
 
     setBulkMode(false)
     setBulkCounts(new Map())
+    setBulkPartials(new Map())
     await loadItems()
   }
 
@@ -488,7 +533,7 @@ export default function Home() {
             ⚠️ Check Low Stock
           </button>
           <button
-            onClick={() => { setBulkMode(true); setBulkCounts(new Map()) }}
+            onClick={() => { setBulkMode(true); setBulkCounts(new Map()); setBulkPartials(new Map()) }}
             className="px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-xl font-bold shadow hover:from-violet-600 hover:to-purple-600 transition-all"
           >
             ⚡ Bulk Count
@@ -551,44 +596,78 @@ export default function Home() {
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-800">⚡ Bulk Count Mode</h2>
                 <p className="text-gray-500 mt-1">
-                  {bulkCounts.size} of {filteredItems.length} items counted
+                  {getBulkEditedCount()} of {filteredItems.length} items counted
                 </p>
               </div>
+              <div className="grid grid-cols-[1fr_5.5rem_5.5rem_5.5rem] gap-2 px-4 py-2 bg-gray-100 border-b border-gray-200 text-xs font-bold uppercase tracking-wide text-gray-500">
+                <span>Item</span>
+                <span className="text-center">Full</span>
+                <span className="text-center">Partial 1</span>
+                <span className="text-center">Partial 2</span>
+              </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                {filteredItems.map((item, index) => (
-                  <div key={item.id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-800 truncate">{item.name}</p>
-                      <p className="text-sm text-gray-500">Current: {item.current_count}</p>
+                {filteredItems.map((item, index) => {
+                  const partials = bulkPartials.get(item.id)
+                  const baseInputIndex = index * 3
+                  return (
+                    <div key={item.id} className="grid grid-cols-[1fr_5.5rem_5.5rem_5.5rem] items-center gap-2 p-3 rounded-xl bg-gray-50 hover:bg-gray-100">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gray-800 truncate">{item.name}</p>
+                        <p className="text-sm text-gray-500">Current: {Math.round((item.current_count + (item.partial_count || 0)) * 10) / 10}</p>
+                      </div>
+                      <input
+                        type="number"
+                        step="1"
+                        min="0"
+                        data-bulk-index={baseInputIndex}
+                        placeholder="Full"
+                        value={bulkCounts.has(item.id) ? bulkCounts.get(item.id) : ''}
+                        onChange={(e) => handleBulkCountChange(item.id, e.target.value)}
+                        onKeyDown={(e) => handleBulkKeyDown(e, baseInputIndex)}
+                        className="w-full px-2 py-2 rounded-xl border border-gray-300 text-center font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                        autoFocus={index === 0}
+                      />
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="1"
+                        data-bulk-index={baseInputIndex + 1}
+                        placeholder="P1"
+                        value={partials?.partial1 ?? ''}
+                        onChange={(e) => handleBulkPartialChange(item.id, 'partial1', e.target.value)}
+                        onKeyDown={(e) => handleBulkKeyDown(e, baseInputIndex + 1)}
+                        className="w-full px-2 py-2 rounded-xl border border-gray-300 text-center font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                      />
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="1"
+                        data-bulk-index={baseInputIndex + 2}
+                        placeholder="P2"
+                        value={partials?.partial2 ?? ''}
+                        onChange={(e) => handleBulkPartialChange(item.id, 'partial2', e.target.value)}
+                        onKeyDown={(e) => handleBulkKeyDown(e, baseInputIndex + 2)}
+                        className="w-full px-2 py-2 rounded-xl border border-gray-300 text-center font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                      />
                     </div>
-                    <input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      data-bulk-index={index}
-                      placeholder="New"
-                      value={bulkCounts.has(item.id) ? bulkCounts.get(item.id) : ''}
-                      onChange={(e) => handleBulkCountChange(item.id, e.target.value)}
-                      onKeyDown={(e) => handleBulkKeyDown(e, index)}
-                      className="w-24 px-3 py-2 rounded-xl border border-gray-300 text-center font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none"
-                      autoFocus={index === 0}
-                    />
-                  </div>
-                ))}
+                  )
+                })}
               </div>
               <div className="p-4 border-t border-gray-200 flex gap-3 justify-end">
                 <button
-                  onClick={() => { setBulkMode(false); setBulkCounts(new Map()) }}
+                  onClick={() => { setBulkMode(false); setBulkCounts(new Map()); setBulkPartials(new Map()) }}
                   className="px-6 py-3 rounded-xl font-bold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmitBulkCounts}
-                  disabled={bulkSubmitting || bulkCounts.size === 0}
+                  disabled={bulkSubmitting || getBulkEditedCount() === 0}
                   className="px-8 py-3 rounded-xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {bulkSubmitting ? '⏳ Saving...' : `✅ Submit All (${bulkCounts.size})`}
+                  {bulkSubmitting ? '⏳ Saving...' : `✅ Submit All (${getBulkEditedCount()})`}
                 </button>
               </div>
             </div>
