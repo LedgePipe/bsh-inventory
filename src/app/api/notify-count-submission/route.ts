@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
+export const dynamic = 'force-dynamic'
+
 interface CountItem {
   itemId: string
   newCount: number
@@ -67,28 +69,33 @@ BSH Inventory System
     // Check if Resend API key is configured
     const resendApiKey = process.env.RESEND_API_KEY
 
-    if (resendApiKey && managerEmails.length > 0) {
-      // Send email via Resend
-      const emailResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'BSH Inventory <onboarding@resend.dev>',
-          to: managerEmails,
-          subject: `[BSH] ${submittedBy} submitted ${submissionType.toUpperCase()} counts`,
-          text: emailBody,
-        }),
-      })
+    let successfulEmails = 0
 
-      if (!emailResponse.ok) {
-        const errorText = await emailResponse.text()
-        console.error('Resend error:', errorText)
-        // Don't fail the request, just log the error
-      } else {
-        console.log('Email sent successfully to:', managerEmails)
+    if (resendApiKey && managerEmails.length > 0) {
+      // Send individually so one bad/free-plan recipient does not reject the entire notification batch.
+      for (const email of managerEmails) {
+        const emailResponse = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: process.env.RESEND_FROM_EMAIL || 'BSH Inventory <onboarding@resend.dev>',
+            to: [email],
+            subject: `[BSH] ${submittedBy} submitted ${submissionType.toUpperCase()} counts`,
+            text: emailBody,
+          }),
+        })
+
+        if (!emailResponse.ok) {
+          const errorText = await emailResponse.text()
+          console.error(`Resend error for ${email}:`, errorText)
+          // Don't fail the request, just log the error
+        } else {
+          successfulEmails += 1
+          console.log('Email sent successfully to:', email)
+        }
       }
     } else {
       console.log('Email notification skipped - no API key or no managers')
@@ -111,7 +118,7 @@ BSH Inventory System
     return NextResponse.json({
       success: true,
       message: 'Notification processed',
-      emailsSent: managerEmails.length,
+      emailsSent: successfulEmails,
     })
   } catch (error) {
     console.error('Notification error:', error)
