@@ -251,9 +251,11 @@ export default function InventoryPage() {
         </div>
 
         {/* Par Edit Hint */}
-        <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-          ✏️ Tap any par number to edit it
-        </div>
+        {userRole !== 'staff' && (
+          <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+            ✏️ Manager/Admin: tap any par number to edit it
+          </div>
+        )}
 
         {/* Tab Content */}
         <div className="mb-24">

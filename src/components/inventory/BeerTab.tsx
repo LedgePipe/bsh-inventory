@@ -271,7 +271,7 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        {editingPar === item.id ? (
+                        {userRole !== 'staff' && editingPar === item.id ? (
                           <input
                             type="number"
                             defaultValue={item.par_level}
@@ -287,8 +287,8 @@ export default function BeerTab({ userRole, userId, onCountChange, editedCounts 
                           />
                         ) : (
                           <span
-                            className="font-medium cursor-pointer hover:text-purple-600 underline decoration-dotted underline-offset-4"
-                            onClick={() => setEditingPar(item.id)}
+                            className={`font-medium ${userRole !== 'staff' ? 'cursor-pointer hover:text-purple-600 underline decoration-dotted underline-offset-4' : ''}`}
+                            onClick={() => userRole !== 'staff' && setEditingPar(item.id)}
                           >
                             {item.par_level}
                           </span>
