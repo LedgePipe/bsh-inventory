@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { escapeHtml, getSignedInProfile } from '@/lib/api-auth'
+
+export const dynamic = 'force-dynamic'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,12 +11,17 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    let userId: string | null = null
+    // Snapshots write with the service key and email the full inventory, so admins only.
+    const profile = await getSignedInProfile()
+    if (!profile || profile.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 })
+    }
+
+    const userId: string | null = profile.id
     let notes: string | null = null
 
     try {
       const body = await request.json()
-      userId = body.userId || null
       notes = body.notes || null
     } catch {
       // No body is fine
@@ -95,7 +103,7 @@ export async function POST(request: NextRequest) {
             const total = (item.current_count || 0) + (item.partial_count || 0)
             const status = item.par_level > 0 && total < item.par_level * 0.5 ? '🚨' : total < item.par_level * 0.75 ? '⚠️' : '✅'
             return `<tr>
-              <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb;">${item.name}</td>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb;">${escapeHtml(item.name)}</td>
               <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.current_count}</td>
               <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.partial_count || 0}</td>
               <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: center; font-weight: bold;">${total.toFixed(1)}</td>
@@ -127,7 +135,7 @@ export async function POST(request: NextRequest) {
           .map(item => {
             const status = item.par_level > 0 && item.current_count < item.par_level * 0.5 ? '🚨' : item.current_count < item.par_level * 0.75 ? '⚠️' : '✅'
             return `<tr>
-              <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb;">${item.product_name}</td>
+              <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb;">${escapeHtml(item.product_name)}</td>
               <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.current_count}</td>
               <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.par_level}</td>
               <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">${status}</td>

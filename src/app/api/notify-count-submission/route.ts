@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
+import { getSignedInProfile } from '@/lib/api-auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,7 +20,16 @@ interface NotifyRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    // Only signed-in staff can send count notifications to managers.
+    const profile = await getSignedInProfile()
+    if (!profile) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body: NotifyRequest = await request.json()
+    if (!Array.isArray(body?.itemsData) || typeof body?.submissionType !== 'string') {
+      return NextResponse.json({ success: false, error: 'Invalid request' }, { status: 400 })
+    }
     const { submittedBy, submissionType, itemsData } = body
 
     const supabase = createRouteHandlerClient({ cookies })
@@ -107,7 +117,7 @@ BSH Inventory System
     const { error: updateError } = await supabase
       .from('count_submissions')
       .update({ notification_sent: true })
-      .eq('submitted_by', (await supabase.auth.getUser()).data.user?.id)
+      .eq('submitted_by', profile.id)
       .order('submitted_at', { ascending: false })
       .limit(1)
 
